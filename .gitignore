@@ -3,8 +3,20 @@ __v0_runtime_loader.js
 __v0_devtools.tsx
 __v0_jsx-dev-runtime.ts
 
-# Common ignores
+# Sensitive data
+.env
+.env.local
+.env.*.local
+*.log
+
+# Dependencies and build
 node_modules/
 .next/
-.env*.local
+out/
+build/
+pnpm-lock.yaml
+package-lock.json
+
+# System files
 .DS_Store
+Thumbs.db

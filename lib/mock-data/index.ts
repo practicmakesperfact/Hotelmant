@@ -1,0 +1,928 @@
+import type {
+  User,
+  Customer,
+  Staff,
+  Room,
+  Booking,
+  Service,
+  ServiceRequest,
+  HousekeepingTask,
+  MaintenanceRequest,
+  InventoryItem,
+  Supplier,
+  PurchaseOrder,
+  Notification,
+  DailyReport,
+  RoomType,
+  RoomStatus,
+  BookingStatus,
+  PaymentStatus,
+} from '@/lib/types';
+
+// Helper to create dates
+const today = new Date();
+const addDays = (date: Date, days: number) => {
+  const result = new Date(date);
+  result.setDate(result.getDate() + days);
+  return result;
+};
+const subDays = (date: Date, days: number) => addDays(date, -days);
+
+// Users - Staff
+export const mockStaff: Staff[] = [
+  {
+    id: 'staff-001',
+    email: 'admin@leulmekonenhotel.com',
+    password: '$2b$10$hashedpassword', // "admin123"
+    firstName: 'Abebe',
+    lastName: 'Kebede',
+    role: 'admin',
+    phone: '+251911223344',
+    department: 'Administration',
+    hireDate: new Date('2020-01-15'),
+    employeeId: 'EMP001',
+    createdAt: new Date('2020-01-15'),
+    updatedAt: new Date(),
+    isActive: true,
+  },
+  {
+    id: 'staff-002',
+    email: 'manager@leulmekonenhotel.com',
+    password: '$2b$10$hashedpassword',
+    firstName: 'Tigist',
+    lastName: 'Haile',
+    role: 'manager',
+    phone: '+251922334455',
+    department: 'Management',
+    shift: 'morning',
+    hireDate: new Date('2021-03-10'),
+    employeeId: 'EMP002',
+    createdAt: new Date('2021-03-10'),
+    updatedAt: new Date(),
+    isActive: true,
+  },
+  {
+    id: 'staff-003',
+    email: 'reception@leulmekonenhotel.com',
+    password: '$2b$10$hashedpassword',
+    firstName: 'Meskerem',
+    lastName: 'Tadesse',
+    role: 'receptionist',
+    phone: '+251933445566',
+    department: 'Front Desk',
+    shift: 'morning',
+    hireDate: new Date('2022-06-01'),
+    employeeId: 'EMP003',
+    createdAt: new Date('2022-06-01'),
+    updatedAt: new Date(),
+    isActive: true,
+  },
+  {
+    id: 'staff-004',
+    email: 'housekeeping@leulmekonenhotel.com',
+    password: '$2b$10$hashedpassword',
+    firstName: 'Almaz',
+    lastName: 'Worku',
+    role: 'housekeeping',
+    phone: '+251944556677',
+    department: 'Housekeeping',
+    shift: 'morning',
+    hireDate: new Date('2022-08-15'),
+    employeeId: 'EMP004',
+    createdAt: new Date('2022-08-15'),
+    updatedAt: new Date(),
+    isActive: true,
+  },
+  {
+    id: 'staff-005',
+    email: 'inventory@leulmekonenhotel.com',
+    password: '$2b$10$hashedpassword',
+    firstName: 'Dawit',
+    lastName: 'Mengistu',
+    role: 'inventory_manager',
+    phone: '+251955667788',
+    department: 'Inventory',
+    shift: 'morning',
+    hireDate: new Date('2023-01-10'),
+    employeeId: 'EMP005',
+    createdAt: new Date('2023-01-10'),
+    updatedAt: new Date(),
+    isActive: true,
+  },
+];
+
+// Users - Customers
+export const mockCustomers: Customer[] = [
+  {
+    id: 'cust-001',
+    email: 'customer@example.com',
+    password: '$2b$10$hashedpassword',
+    firstName: 'Yohannes',
+    lastName: 'Gebremedhin',
+    role: 'customer',
+    phone: '+251966778899',
+    loyaltyPoints: 1500,
+    preferences: {
+      roomType: 'deluxe',
+      floorPreference: 'high',
+      smoking: false,
+    },
+    bookingHistory: ['BK-2024-001', 'BK-2024-002'],
+    createdAt: new Date('2023-05-20'),
+    updatedAt: new Date(),
+    isActive: true,
+  },
+  {
+    id: 'cust-002',
+    email: 'sara.ahmed@email.com',
+    password: '$2b$10$hashedpassword',
+    firstName: 'Sara',
+    lastName: 'Ahmed',
+    role: 'customer',
+    phone: '+251977889900',
+    loyaltyPoints: 800,
+    preferences: {
+      roomType: 'suite',
+      smoking: false,
+    },
+    bookingHistory: ['BK-2024-003'],
+    createdAt: new Date('2023-08-10'),
+    updatedAt: new Date(),
+    isActive: true,
+  },
+  {
+    id: 'cust-003',
+    email: 'michael.tesfaye@email.com',
+    password: '$2b$10$hashedpassword',
+    firstName: 'Michael',
+    lastName: 'Tesfaye',
+    role: 'customer',
+    phone: '+251988990011',
+    loyaltyPoints: 2500,
+    preferences: {
+      roomType: 'presidential',
+      floorPreference: 'high',
+      specialRequests: 'Late checkout preferred',
+    },
+    bookingHistory: ['BK-2024-004', 'BK-2024-005', 'BK-2024-006'],
+    createdAt: new Date('2022-12-01'),
+    updatedAt: new Date(),
+    isActive: true,
+  },
+];
+
+// Combine all users
+export const mockUsers: User[] = [...mockStaff, ...mockCustomers];
+
+// Rooms
+export const mockRooms: Room[] = [
+  // Standard Rooms (101-110)
+  ...Array.from({ length: 10 }, (_, i) => ({
+    id: `room-${101 + i}`,
+    roomNumber: `${101 + i}`,
+    type: 'standard' as RoomType,
+    floor: 1,
+    bedType: (i % 2 === 0 ? 'double' : 'twin') as 'double' | 'twin',
+    maxOccupancy: 2,
+    pricePerNight: 2500,
+    status: (['available', 'occupied', 'cleaning', 'available', 'occupied', 'available', 'maintenance', 'available', 'occupied', 'available'] as RoomStatus[])[i],
+    amenities: ['WiFi', 'TV', 'Air Conditioning', 'Mini Bar', 'Safe'],
+    description: 'Comfortable standard room with modern amenities, perfect for business travelers or couples.',
+    descriptionAm: 'ምቹ መደበኛ ክፍል ከዘመናዊ አገልግሎቶች ጋር፣ ለንግድ ተጓዦች ወይም ጥንዶች ተስማሚ።',
+    descriptionOm: 'Kutaa idilee mijataa tajaajila ammayyaatiin, imaltootaaf ykn lammiilee daldalaa kan mijatu.',
+    images: ['/images/rooms/standard-1.jpg', '/images/rooms/standard-2.jpg'],
+    panoramaImage: '/images/rooms/standard-360.jpg',
+    size: 25,
+    view: (i < 5 ? 'city' : 'garden') as 'city' | 'garden',
+    isSmokingAllowed: false,
+    hasBalcony: false,
+    createdAt: new Date('2020-01-01'),
+    updatedAt: new Date(),
+  })),
+  // Deluxe Rooms (201-215)
+  ...Array.from({ length: 15 }, (_, i) => ({
+    id: `room-${201 + i}`,
+    roomNumber: `${201 + i}`,
+    type: 'deluxe' as RoomType,
+    floor: 2,
+    bedType: 'queen' as const,
+    maxOccupancy: 2,
+    pricePerNight: 4000,
+    status: (['available', 'occupied', 'available', 'occupied', 'cleaning', 'available', 'occupied', 'available', 'reserved', 'available', 'occupied', 'available', 'available', 'maintenance', 'available'] as RoomStatus[])[i],
+    amenities: ['WiFi', 'Smart TV', 'Air Conditioning', 'Mini Bar', 'Safe', 'Coffee Machine', 'Bathrobe', 'Slippers'],
+    description: 'Spacious deluxe room with premium amenities, featuring a comfortable queen bed and elegant décor.',
+    descriptionAm: 'ሰፊ ዴሉክስ ክፍል ከፕሪሚየም አገልግሎቶች ጋር፣ ምቹ ንግስት አልጋ እና ቆንጆ ማስጌጫ ያለው።',
+    descriptionOm: 'Kutaa deluxe bal\'aa tajaajila premium qabu, siree mootittii mijataa fi miidhagina bareedduu kan qabu.',
+    images: ['/images/rooms/deluxe-1.jpg', '/images/rooms/deluxe-2.jpg', '/images/rooms/deluxe-3.jpg'],
+    panoramaImage: '/images/rooms/deluxe-360.jpg',
+    size: 35,
+    view: (i % 3 === 0 ? 'pool' : i % 3 === 1 ? 'city' : 'garden') as 'pool' | 'city' | 'garden',
+    isSmokingAllowed: false,
+    hasBalcony: true,
+    createdAt: new Date('2020-01-01'),
+    updatedAt: new Date(),
+  })),
+  // Suite Rooms (301-310)
+  ...Array.from({ length: 10 }, (_, i) => ({
+    id: `room-${301 + i}`,
+    roomNumber: `${301 + i}`,
+    type: 'suite' as RoomType,
+    floor: 3,
+    bedType: 'king' as const,
+    maxOccupancy: 3,
+    pricePerNight: 7000,
+    status: (['available', 'occupied', 'available', 'reserved', 'occupied', 'available', 'available', 'occupied', 'available', 'cleaning'] as RoomStatus[])[i],
+    amenities: ['WiFi', 'Smart TV', 'Air Conditioning', 'Mini Bar', 'Safe', 'Coffee Machine', 'Bathrobe', 'Slippers', 'Living Area', 'Work Desk', 'Jacuzzi'],
+    description: 'Luxurious suite with separate living area, king-size bed, and premium amenities for the discerning traveler.',
+    descriptionAm: 'ቅንጦታማ ስዊት ከተለየ መኖሪያ ቦታ ጋር፣ ንጉሥ መጠን አልጋ እና ለተመረጡ ተጓዦች የፕሪሚየም አገልግሎቶች።',
+    descriptionOm: 'Suite miidhagaa naannoo jireenyaa adda ta\'e, siree king-size fi tajaajila premium imaltootaaf.',
+    images: ['/images/rooms/suite-1.jpg', '/images/rooms/suite-2.jpg', '/images/rooms/suite-3.jpg'],
+    panoramaImage: '/images/rooms/suite-360.jpg',
+    size: 55,
+    view: 'mountain' as const,
+    isSmokingAllowed: false,
+    hasBalcony: true,
+    createdAt: new Date('2020-01-01'),
+    updatedAt: new Date(),
+  })),
+  // Family Rooms (401-405)
+  ...Array.from({ length: 5 }, (_, i) => ({
+    id: `room-${401 + i}`,
+    roomNumber: `${401 + i}`,
+    type: 'family' as RoomType,
+    floor: 4,
+    bedType: 'king' as const,
+    maxOccupancy: 4,
+    pricePerNight: 5500,
+    status: (['available', 'occupied', 'available', 'reserved', 'available'] as RoomStatus[])[i],
+    amenities: ['WiFi', 'Smart TV', 'Air Conditioning', 'Mini Bar', 'Safe', 'Extra Beds', 'Kids Amenities', 'Connecting Room Option'],
+    description: 'Perfect for families, featuring spacious layout with extra beds and kid-friendly amenities.',
+    descriptionAm: 'ለቤተሰቦች ተስማሚ፣ ሰፊ ንድፍ ከተጨማሪ አልጋዎች እና ለልጆች ተስማሚ አገልግሎቶች ያለው።',
+    descriptionOm: 'Maatiidhaaf mijataa, dizaayinii bal\'aa siree dabalataa fi tajaajila daa\'immaniif mijatu qabu.',
+    images: ['/images/rooms/family-1.jpg', '/images/rooms/family-2.jpg'],
+    panoramaImage: '/images/rooms/family-360.jpg',
+    size: 50,
+    view: 'garden' as const,
+    isSmokingAllowed: false,
+    hasBalcony: true,
+    createdAt: new Date('2020-01-01'),
+    updatedAt: new Date(),
+  })),
+  // Presidential Suite (501-502)
+  ...Array.from({ length: 2 }, (_, i) => ({
+    id: `room-${501 + i}`,
+    roomNumber: `${501 + i}`,
+    type: 'presidential' as RoomType,
+    floor: 5,
+    bedType: 'king' as const,
+    maxOccupancy: 4,
+    pricePerNight: 15000,
+    status: (['available', 'occupied'] as RoomStatus[])[i],
+    amenities: ['WiFi', 'Smart TV', 'Air Conditioning', 'Mini Bar', 'Safe', 'Private Butler', 'Kitchen', 'Dining Room', 'Jacuzzi', 'Sauna', 'Private Terrace', '24/7 Concierge'],
+    description: 'The epitome of luxury, our Presidential Suite offers unparalleled elegance with private butler service, full kitchen, and breathtaking views.',
+    descriptionAm: 'የቅንጦት ጥግ፣ የእኛ ፕሬዚዳንታዊ ስዊት ከግል አገልጋይ አገልግሎት፣ ሙሉ ኩሽና እና አስደናቂ እይታዎች ጋር ድንቅ ውበትን ይሰጣል።',
+    descriptionOm: 'Firii luxarii, Suite Presidential keenya tajaajila butler dhuunfaa, kuushinii guutuu fi ilaalcha dinqisiisaa kan kennudha.',
+    images: ['/images/rooms/presidential-1.jpg', '/images/rooms/presidential-2.jpg', '/images/rooms/presidential-3.jpg'],
+    panoramaImage: '/images/rooms/presidential-360.jpg',
+    size: 120,
+    view: 'mountain' as const,
+    isSmokingAllowed: false,
+    hasBalcony: true,
+    createdAt: new Date('2020-01-01'),
+    updatedAt: new Date(),
+  })),
+];
+
+// Bookings
+export const mockBookings: Booking[] = [
+  {
+    id: 'BK-2024-001',
+    bookingNumber: 'BK-2024-001',
+    customerId: 'cust-001',
+    customerName: 'Yohannes Gebremedhin',
+    customerEmail: 'customer@example.com',
+    customerPhone: '+251966778899',
+    roomId: 'room-102',
+    roomNumber: '102',
+    roomType: 'standard',
+    checkInDate: today,
+    checkOutDate: addDays(today, 3),
+    numberOfGuests: 2,
+    numberOfNights: 3,
+    totalAmount: 7500,
+    paidAmount: 7500,
+    status: 'checked_in',
+    paymentStatus: 'paid',
+    paymentMethod: 'chapa',
+    addOns: [
+      { id: 'addon-1', name: 'Airport Pickup', price: 500, quantity: 1 },
+      { id: 'addon-2', name: 'Breakfast', price: 300, quantity: 3 },
+    ],
+    createdAt: subDays(today, 5),
+    updatedAt: today,
+    actualCheckIn: today,
+  },
+  {
+    id: 'BK-2024-002',
+    bookingNumber: 'BK-2024-002',
+    customerId: 'cust-002',
+    customerName: 'Sara Ahmed',
+    customerEmail: 'sara.ahmed@email.com',
+    customerPhone: '+251977889900',
+    roomId: 'room-202',
+    roomNumber: '202',
+    roomType: 'deluxe',
+    checkInDate: addDays(today, 1),
+    checkOutDate: addDays(today, 4),
+    numberOfGuests: 2,
+    numberOfNights: 3,
+    totalAmount: 12000,
+    paidAmount: 6000,
+    status: 'confirmed',
+    paymentStatus: 'partial',
+    paymentMethod: 'telebirr',
+    addOns: [],
+    createdAt: subDays(today, 3),
+    updatedAt: subDays(today, 3),
+  },
+  {
+    id: 'BK-2024-003',
+    bookingNumber: 'BK-2024-003',
+    customerId: 'cust-003',
+    customerName: 'Michael Tesfaye',
+    customerEmail: 'michael.tesfaye@email.com',
+    customerPhone: '+251988990011',
+    roomId: 'room-501',
+    roomNumber: '501',
+    roomType: 'presidential',
+    checkInDate: addDays(today, 2),
+    checkOutDate: addDays(today, 5),
+    numberOfGuests: 2,
+    numberOfNights: 3,
+    totalAmount: 45000,
+    paidAmount: 45000,
+    status: 'confirmed',
+    paymentStatus: 'paid',
+    paymentMethod: 'bank_transfer',
+    specialRequests: 'Late checkout at 2 PM, champagne on arrival',
+    addOns: [
+      { id: 'addon-3', name: 'Spa Package', price: 5000, quantity: 2 },
+      { id: 'addon-4', name: 'Private Dinner', price: 8000, quantity: 1 },
+    ],
+    createdAt: subDays(today, 7),
+    updatedAt: subDays(today, 7),
+  },
+  {
+    id: 'BK-2024-004',
+    bookingNumber: 'BK-2024-004',
+    customerId: 'cust-001',
+    customerName: 'Yohannes Gebremedhin',
+    customerEmail: 'customer@example.com',
+    customerPhone: '+251966778899',
+    roomId: 'room-105',
+    roomNumber: '105',
+    roomType: 'standard',
+    checkInDate: subDays(today, 2),
+    checkOutDate: today,
+    numberOfGuests: 1,
+    numberOfNights: 2,
+    totalAmount: 5000,
+    paidAmount: 5000,
+    status: 'checked_out',
+    paymentStatus: 'paid',
+    paymentMethod: 'cash',
+    addOns: [],
+    createdAt: subDays(today, 10),
+    updatedAt: today,
+    actualCheckIn: subDays(today, 2),
+    actualCheckOut: today,
+  },
+  // Pending bookings for today
+  {
+    id: 'BK-2024-005',
+    bookingNumber: 'BK-2024-005',
+    customerId: 'guest-walk-001',
+    customerName: 'Helen Bekele',
+    customerEmail: 'helen.bekele@email.com',
+    customerPhone: '+251999001122',
+    roomId: 'room-205',
+    roomNumber: '205',
+    roomType: 'deluxe',
+    checkInDate: today,
+    checkOutDate: addDays(today, 2),
+    numberOfGuests: 2,
+    numberOfNights: 2,
+    totalAmount: 8000,
+    paidAmount: 0,
+    status: 'confirmed',
+    paymentStatus: 'pending',
+    addOns: [],
+    createdAt: subDays(today, 1),
+    updatedAt: subDays(today, 1),
+  },
+  {
+    id: 'BK-2024-006',
+    bookingNumber: 'BK-2024-006',
+    customerId: 'guest-walk-002',
+    customerName: 'Daniel Alemu',
+    customerEmail: 'daniel.alemu@email.com',
+    customerPhone: '+251999112233',
+    roomId: 'room-301',
+    roomNumber: '301',
+    roomType: 'suite',
+    checkInDate: today,
+    checkOutDate: addDays(today, 5),
+    numberOfGuests: 2,
+    numberOfNights: 5,
+    totalAmount: 35000,
+    paidAmount: 35000,
+    status: 'confirmed',
+    paymentStatus: 'paid',
+    paymentMethod: 'chapa',
+    specialRequests: 'Honeymoon package, flowers in room',
+    addOns: [
+      { id: 'addon-5', name: 'Honeymoon Package', price: 3000, quantity: 1 },
+    ],
+    createdAt: subDays(today, 14),
+    updatedAt: subDays(today, 14),
+  },
+];
+
+// Services
+export const mockServices: Service[] = [
+  {
+    id: 'svc-001',
+    name: 'Room Service',
+    nameAm: 'የክፍል አገልግሎት',
+    nameOm: 'Tajaajila Kutaa',
+    category: 'room_service',
+    description: '24/7 in-room dining with diverse menu options',
+    price: 0, // varies by order
+    chargeType: 'per_item',
+    isAvailable: true,
+    availableHours: { start: '00:00', end: '23:59' },
+  },
+  {
+    id: 'svc-002',
+    name: 'Laundry Service',
+    nameAm: 'የልብስ ማጠቢያ አገልግሎት',
+    nameOm: 'Tajaajila Miicaa Uffataa',
+    category: 'laundry',
+    description: 'Same-day laundry and dry cleaning service',
+    price: 150,
+    chargeType: 'per_item',
+    isAvailable: true,
+    availableHours: { start: '07:00', end: '20:00' },
+  },
+  {
+    id: 'svc-003',
+    name: 'Spa & Wellness',
+    nameAm: 'ስፓ እና ጤና',
+    nameOm: 'Spa fi Fayyaa',
+    category: 'spa',
+    description: 'Full spa treatments including massage, facial, and body treatments',
+    price: 2000,
+    chargeType: 'per_stay',
+    isAvailable: true,
+    availableHours: { start: '09:00', end: '21:00' },
+  },
+  {
+    id: 'svc-004',
+    name: 'Airport Shuttle',
+    nameAm: 'የአየር ማረፊያ ማመላለሻ',
+    nameOm: 'Geejjiba Buufata Xiyyaaraa',
+    category: 'transport',
+    description: 'Comfortable airport pickup and drop-off service',
+    price: 800,
+    chargeType: 'per_person',
+    isAvailable: true,
+  },
+  {
+    id: 'svc-005',
+    name: 'Restaurant - Ethiopian Cuisine',
+    nameAm: 'ምግብ ቤት - የኢትዮጵያ ምግብ',
+    nameOm: "Mana Nyaataa - Nyaata Itoophiyaa",
+    category: 'restaurant',
+    description: 'Traditional Ethiopian dishes and international cuisine',
+    price: 0,
+    chargeType: 'per_item',
+    isAvailable: true,
+    availableHours: { start: '06:00', end: '22:00' },
+  },
+  {
+    id: 'svc-006',
+    name: 'Breakfast Buffet',
+    nameAm: 'የቁርስ ቡፌ',
+    nameOm: 'Buffet Ciree',
+    category: 'restaurant',
+    description: 'Extensive breakfast buffet with local and international options',
+    price: 350,
+    chargeType: 'per_person',
+    isAvailable: true,
+    availableHours: { start: '06:30', end: '10:30' },
+  },
+];
+
+// Service Requests
+export const mockServiceRequests: ServiceRequest[] = [
+  {
+    id: 'sr-001',
+    bookingId: 'BK-2024-001',
+    roomNumber: '102',
+    customerId: 'cust-001',
+    serviceId: 'svc-002',
+    serviceName: 'Laundry Service',
+    quantity: 5,
+    totalPrice: 750,
+    status: 'in_progress',
+    notes: '3 shirts, 2 pants - express service',
+    requestedAt: subDays(today, 0),
+    assignedTo: 'staff-004',
+  },
+  {
+    id: 'sr-002',
+    bookingId: 'BK-2024-001',
+    roomNumber: '102',
+    customerId: 'cust-001',
+    serviceId: 'svc-001',
+    serviceName: 'Room Service',
+    quantity: 1,
+    totalPrice: 450,
+    status: 'completed',
+    notes: 'Continental breakfast, coffee',
+    requestedAt: subDays(today, 1),
+    completedAt: subDays(today, 1),
+  },
+];
+
+// Housekeeping Tasks
+export const mockHousekeepingTasks: HousekeepingTask[] = [
+  {
+    id: 'hk-001',
+    roomId: 'room-103',
+    roomNumber: '103',
+    type: 'checkout_clean',
+    priority: 'high',
+    status: 'pending',
+    assignedTo: 'staff-004',
+    assignedToName: 'Almaz Worku',
+    scheduledFor: today,
+    checklistItems: [
+      { id: 'cl-1', task: 'Change bed linens', isCompleted: false },
+      { id: 'cl-2', task: 'Clean bathroom', isCompleted: false },
+      { id: 'cl-3', task: 'Vacuum carpet', isCompleted: false },
+      { id: 'cl-4', task: 'Restock minibar', isCompleted: false },
+      { id: 'cl-5', task: 'Replace toiletries', isCompleted: false },
+    ],
+  },
+  {
+    id: 'hk-002',
+    roomId: 'room-205',
+    roomNumber: '205',
+    type: 'stay_clean',
+    priority: 'medium',
+    status: 'in_progress',
+    assignedTo: 'staff-004',
+    assignedToName: 'Almaz Worku',
+    scheduledFor: today,
+    startedAt: new Date(),
+    checklistItems: [
+      { id: 'cl-6', task: 'Make bed', isCompleted: true },
+      { id: 'cl-7', task: 'Clean bathroom', isCompleted: true },
+      { id: 'cl-8', task: 'Empty trash', isCompleted: false },
+      { id: 'cl-9', task: 'Replenish towels', isCompleted: false },
+    ],
+  },
+  {
+    id: 'hk-003',
+    roomId: 'room-310',
+    roomNumber: '310',
+    type: 'deep_clean',
+    priority: 'low',
+    status: 'pending',
+    scheduledFor: addDays(today, 1),
+    checklistItems: [
+      { id: 'cl-10', task: 'Deep clean carpets', isCompleted: false },
+      { id: 'cl-11', task: 'Clean windows', isCompleted: false },
+      { id: 'cl-12', task: 'Polish furniture', isCompleted: false },
+      { id: 'cl-13', task: 'Clean AC vents', isCompleted: false },
+    ],
+  },
+];
+
+// Maintenance Requests
+export const mockMaintenanceRequests: MaintenanceRequest[] = [
+  {
+    id: 'maint-001',
+    roomId: 'room-107',
+    roomNumber: '107',
+    reportedBy: 'staff-004',
+    reportedByName: 'Almaz Worku',
+    issue: 'Air conditioning not cooling properly',
+    priority: 'high',
+    status: 'in_progress',
+    assignedTo: 'maint-001',
+    createdAt: subDays(today, 1),
+  },
+  {
+    id: 'maint-002',
+    roomId: 'room-214',
+    roomNumber: '214',
+    reportedBy: 'staff-003',
+    reportedByName: 'Meskerem Tadesse',
+    issue: 'Bathroom faucet leaking',
+    priority: 'medium',
+    status: 'pending',
+    createdAt: today,
+  },
+];
+
+// Inventory Items
+export const mockInventoryItems: InventoryItem[] = [
+  {
+    id: 'inv-001',
+    name: 'Bath Towels',
+    category: 'linens',
+    sku: 'LIN-TOW-001',
+    currentStock: 150,
+    minimumStock: 100,
+    maximumStock: 300,
+    unitPrice: 250,
+    unit: 'piece',
+    location: 'Storage Room A',
+    lastRestocked: subDays(today, 15),
+  },
+  {
+    id: 'inv-002',
+    name: 'Bed Sheets (Queen)',
+    category: 'linens',
+    sku: 'LIN-SHT-Q01',
+    currentStock: 80,
+    minimumStock: 50,
+    maximumStock: 150,
+    unitPrice: 450,
+    unit: 'set',
+    location: 'Storage Room A',
+    lastRestocked: subDays(today, 20),
+  },
+  {
+    id: 'inv-003',
+    name: 'Shampoo Bottles',
+    category: 'toiletries',
+    sku: 'TOI-SHA-001',
+    currentStock: 30,
+    minimumStock: 100,
+    maximumStock: 500,
+    unitPrice: 25,
+    unit: 'bottle',
+    location: 'Storage Room B',
+    lastRestocked: subDays(today, 5),
+  },
+  {
+    id: 'inv-004',
+    name: 'Toilet Paper',
+    category: 'toiletries',
+    sku: 'TOI-TPR-001',
+    currentStock: 200,
+    minimumStock: 150,
+    maximumStock: 600,
+    unitPrice: 15,
+    unit: 'roll',
+    location: 'Storage Room B',
+    lastRestocked: subDays(today, 10),
+  },
+  {
+    id: 'inv-005',
+    name: 'All-Purpose Cleaner',
+    category: 'cleaning',
+    sku: 'CLN-APC-001',
+    currentStock: 25,
+    minimumStock: 20,
+    maximumStock: 100,
+    unitPrice: 120,
+    unit: 'liter',
+    location: 'Cleaning Supply Room',
+    lastRestocked: subDays(today, 7),
+  },
+  {
+    id: 'inv-006',
+    name: 'Minibar Water',
+    category: 'minibar',
+    sku: 'MNB-WAT-001',
+    currentStock: 500,
+    minimumStock: 200,
+    maximumStock: 1000,
+    unitPrice: 20,
+    unit: 'bottle',
+    location: 'Minibar Storage',
+    lastRestocked: subDays(today, 3),
+  },
+  {
+    id: 'inv-007',
+    name: 'Coffee Pods',
+    category: 'minibar',
+    sku: 'MNB-COF-001',
+    currentStock: 15,
+    minimumStock: 50,
+    maximumStock: 200,
+    unitPrice: 35,
+    unit: 'pod',
+    location: 'Minibar Storage',
+    lastRestocked: subDays(today, 12),
+  },
+];
+
+// Suppliers
+export const mockSuppliers: Supplier[] = [
+  {
+    id: 'sup-001',
+    name: 'Addis Linen Supplies',
+    contactPerson: 'Bekele Desta',
+    email: 'sales@addislinen.com',
+    phone: '+251111234567',
+    address: 'Bole Road, Addis Ababa',
+    categories: ['linens'],
+    leadTimeDays: 5,
+    paymentTerms: 'Net 30',
+    isActive: true,
+  },
+  {
+    id: 'sup-002',
+    name: 'Ethiopian Cleaning Solutions',
+    contactPerson: 'Hanna Girma',
+    email: 'orders@ethclean.com',
+    phone: '+251111345678',
+    address: 'Merkato, Addis Ababa',
+    categories: ['cleaning', 'toiletries'],
+    leadTimeDays: 3,
+    paymentTerms: 'Net 15',
+    isActive: true,
+  },
+  {
+    id: 'sup-003',
+    name: 'Minibar Express',
+    contactPerson: 'Samuel Tesfaye',
+    email: 'supply@minibarexpress.com',
+    phone: '+251111456789',
+    address: 'Kazanchis, Addis Ababa',
+    categories: ['minibar'],
+    leadTimeDays: 2,
+    paymentTerms: 'COD',
+    isActive: true,
+  },
+];
+
+// Purchase Orders
+export const mockPurchaseOrders: PurchaseOrder[] = [
+  {
+    id: 'po-001',
+    orderNumber: 'PO-2024-001',
+    supplierId: 'sup-002',
+    supplierName: 'Ethiopian Cleaning Solutions',
+    items: [
+      { itemId: 'inv-003', itemName: 'Shampoo Bottles', quantity: 200, unitPrice: 25 },
+      { itemId: 'inv-005', itemName: 'All-Purpose Cleaner', quantity: 50, unitPrice: 120 },
+    ],
+    totalAmount: 11000,
+    status: 'ordered',
+    createdBy: 'staff-005',
+    createdAt: subDays(today, 2),
+    approvedBy: 'staff-002',
+    approvedAt: subDays(today, 1),
+    expectedDelivery: addDays(today, 1),
+  },
+  {
+    id: 'po-002',
+    orderNumber: 'PO-2024-002',
+    supplierId: 'sup-003',
+    supplierName: 'Minibar Express',
+    items: [
+      { itemId: 'inv-007', itemName: 'Coffee Pods', quantity: 150, unitPrice: 35 },
+    ],
+    totalAmount: 5250,
+    status: 'draft',
+    createdBy: 'staff-005',
+    createdAt: today,
+  },
+];
+
+// Notifications
+export const mockNotifications: Notification[] = [
+  {
+    id: 'notif-001',
+    userId: 'staff-003',
+    type: 'booking',
+    title: 'New Booking',
+    message: 'New booking BK-2024-006 for Suite 301, checking in today.',
+    isRead: false,
+    actionUrl: '/receptionist/bookings/BK-2024-006',
+    createdAt: new Date(),
+  },
+  {
+    id: 'notif-002',
+    userId: 'staff-003',
+    type: 'checkin',
+    title: 'VIP Arrival Today',
+    message: 'Michael Tesfaye (Presidential Suite) arriving on ' + addDays(today, 2).toLocaleDateString(),
+    isRead: false,
+    actionUrl: '/receptionist/arrivals',
+    createdAt: new Date(),
+  },
+  {
+    id: 'notif-003',
+    userId: 'staff-004',
+    type: 'maintenance',
+    title: 'Urgent Task',
+    message: 'Room 103 requires checkout cleaning - high priority',
+    isRead: false,
+    actionUrl: '/housekeeping/tasks/hk-001',
+    createdAt: new Date(),
+  },
+  {
+    id: 'notif-004',
+    userId: 'staff-005',
+    type: 'inventory',
+    title: 'Low Stock Alert',
+    message: 'Shampoo Bottles and Coffee Pods are below minimum stock levels',
+    isRead: false,
+    actionUrl: '/inventory/alerts',
+    createdAt: new Date(),
+  },
+];
+
+// Daily Reports
+export const mockDailyReports: DailyReport[] = Array.from({ length: 30 }, (_, i) => ({
+  date: subDays(today, 29 - i),
+  totalRevenue: 150000 + Math.random() * 100000,
+  roomRevenue: 120000 + Math.random() * 80000,
+  serviceRevenue: 30000 + Math.random() * 20000,
+  occupancyRate: 60 + Math.random() * 35,
+  totalCheckIns: Math.floor(5 + Math.random() * 10),
+  totalCheckOuts: Math.floor(4 + Math.random() * 10),
+  newBookings: Math.floor(3 + Math.random() * 8),
+  cancellations: Math.floor(Math.random() * 3),
+  averageDailyRate: 4000 + Math.random() * 2000,
+}));
+
+// Helper functions
+export function getRoomsByStatus(status: RoomStatus): Room[] {
+  return mockRooms.filter(room => room.status === status);
+}
+
+export function getRoomsByType(type: RoomType): Room[] {
+  return mockRooms.filter(room => room.type === type);
+}
+
+export function getBookingsByStatus(status: BookingStatus): Booking[] {
+  return mockBookings.filter(booking => booking.status === status);
+}
+
+export function getTodayCheckIns(): Booking[] {
+  const todayStr = today.toDateString();
+  return mockBookings.filter(
+    booking => booking.checkInDate.toDateString() === todayStr && booking.status === 'confirmed'
+  );
+}
+
+export function getTodayCheckOuts(): Booking[] {
+  const todayStr = today.toDateString();
+  return mockBookings.filter(
+    booking => booking.checkOutDate.toDateString() === todayStr && booking.status === 'checked_in'
+  );
+}
+
+export function getLowStockItems(): InventoryItem[] {
+  return mockInventoryItems.filter(item => item.currentStock < item.minimumStock);
+}
+
+export function getOccupancyStats() {
+  const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  return Array.from({ length: 7 }, (_, i) => {
+    const d = new Date();
+    d.setDate(d.getDate() - (6 - i));
+    return {
+      date: days[d.getDay()],
+      occupancy: Math.floor(40 + Math.random() * 50)
+    };
+  });
+}
+
+export function getRevenueStats() {
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  return Array.from({ length: 6 }, (_, i) => {
+    const d = new Date();
+    d.setMonth(d.getMonth() - (5 - i));
+    return {
+      month: months[d.getMonth()],
+      revenue: Math.floor(100000 + Math.random() * 100000)
+    };
+  });
+}
+
+export function getUserByEmail(email: string): User | undefined {
+  return mockUsers.find(user => user.email === email);
+}
+
+export function getUserById(id: string): User | undefined {
+  return mockUsers.find(user => user.id === id);
+}
