@@ -29,7 +29,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (token) {
       const decoded = verifyToken(token);
       if (decoded) {
-        const foundUser = getUserById(decoded.userId);
+        // First check mock users
+        let foundUser = getUserById(decoded.userId);
+        // If not found, check localStorage registered users
+        if (!foundUser) {
+          try {
+            const storedUsers = JSON.parse(localStorage.getItem('habesha_hotel_users') || '[]');
+            foundUser = storedUsers.find((u: any) => u.id === decoded.userId);
+          } catch {}
+        }
         if (foundUser) {
           setUser(foundUser);
         } else {

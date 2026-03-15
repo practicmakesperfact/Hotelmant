@@ -2,11 +2,14 @@
 
 import { useState } from "react"
 import { DashboardLayout } from "@/components/layout/dashboard-layout"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { useAuth } from "@/lib/auth/auth-context"
+import { useBookings } from "@/lib/hooks/use-bookings"
+import { useLocale } from "@/lib/i18n/locale-context"
 import { 
   UserCircle, 
   Mail, 
@@ -16,22 +19,40 @@ import {
   Bell,
   Star,
   Trophy,
-  History,
-  CreditCard,
   Save
 } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 export default function CustomerProfilePage() {
+  const { user } = useAuth()
+  const { getCustomerBookings } = useBookings()
+  const { t } = useLocale()
   const [isSaving, setIsSaving] = useState(false)
+
+  // Get real bookings for this user
+  const userBookings = user ? getCustomerBookings(user.email) : []
+  const stayCount = userBookings.filter(
+    b => b.status === "checked_out" || b.status === "checked_in"
+  ).length
+
+  const customerData = user as any
+  const loyaltyPoints = customerData?.loyaltyPoints ?? 0
+
+  // Determine tier based on stays
+  const tier = stayCount >= 10 ? "Gold" : stayCount >= 5 ? "Silver" : "Standard"
 
   const handleSave = () => {
     setIsSaving(true)
     setTimeout(() => setIsSaving(false), 1000)
   }
 
+  const fullName = user ? `${user.firstName} ${user.lastName}` : "Guest"
+  const memberSince = user?.createdAt
+    ? new Date(user.createdAt).toLocaleDateString("en-US", { month: "long", year: "numeric" })
+    : "Recently"
+
   return (
-    <DashboardLayout requiredRoles={["customer"]} title="My Account">
+    <DashboardLayout requiredRoles={["customer"]} title={t.customer.title}>
       <div className="space-y-6">
         {/* Profile Overview */}
         <div className="flex flex-col md:flex-row gap-6">
@@ -40,20 +61,21 @@ export default function CustomerProfilePage() {
               <div className="w-24 h-24 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4 border-2 border-primary/20">
                 <UserCircle className="h-12 w-12 text-primary" />
               </div>
-              <h3 className="text-xl font-bold">Abebe Kebede</h3>
-              <p className="text-sm text-muted-foreground mb-4">Member since January 2024</p>
+              <h3 className="text-xl font-bold">{fullName}</h3>
+              <p className="text-sm text-muted-foreground mb-4">Member since {memberSince}</p>
+              <p className="text-xs text-muted-foreground mb-2">{user?.email}</p>
               <div className="flex justify-center gap-2">
                 <Badge variant="secondary" className="bg-amber-500/10 text-amber-500 border-amber-500/20">
-                  <Star className="h-3 w-3 mr-1 fill-amber-500" /> Gold Member
+                  <Star className="h-3 w-3 mr-1 fill-amber-500" /> {tier} Member
                 </Badge>
               </div>
               <div className="mt-8 grid grid-cols-2 gap-4 border-t pt-6">
                 <div>
-                  <p className="text-2xl font-bold text-primary">1,250</p>
+                  <p className="text-2xl font-bold text-primary">{loyaltyPoints.toLocaleString()}</p>
                   <p className="text-[10px] uppercase font-bold text-muted-foreground">Points</p>
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-primary">12</p>
+                  <p className="text-2xl font-bold text-primary">{stayCount}</p>
                   <p className="text-[10px] uppercase font-bold text-muted-foreground">Stays</p>
                 </div>
               </div>
@@ -78,33 +100,26 @@ export default function CustomerProfilePage() {
                 <TabsContent value="personal" className="pt-6 space-y-6">
                   <div className="grid sm:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="firstName">First Name</Label>
-                      <Input id="firstName" defaultValue="Abebe" />
+                      <Label htmlFor="firstName">{t.auth.firstName}</Label>
+                      <Input id="firstName" defaultValue={user?.firstName || ""} />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="lastName">Last Name</Label>
-                      <Input id="lastName" defaultValue="Kebede" />
+                      <Label htmlFor="lastName">{t.auth.lastName}</Label>
+                      <Input id="lastName" defaultValue={user?.lastName || ""} />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="email">Email Address</Label>
+                      <Label htmlFor="email">{t.auth.email}</Label>
                       <div className="relative">
                         <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <Input id="email" className="pl-9" defaultValue="abebe.kebede@example.com" />
+                        <Input id="email" className="pl-9" defaultValue={user?.email || ""} readOnly />
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="phone">Phone Number</Label>
+                      <Label htmlFor="phone">{t.common.phone}</Label>
                       <div className="relative">
                         <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <Input id="phone" className="pl-9" defaultValue="+251 911 234 567" />
+                        <Input id="phone" className="pl-9" defaultValue={user?.phone || ""} />
                       </div>
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="address">Address</Label>
-                    <div className="relative">
-                      <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                      <Input id="address" className="pl-9" defaultValue="Bole, Addis Ababa, Ethiopia" />
                     </div>
                   </div>
                   <Button onClick={handleSave} disabled={isSaving}>
@@ -170,12 +185,12 @@ export default function CustomerProfilePage() {
           </Card>
         </div>
 
-        {/* Loyalty Program Perks */}
+        {/* Loyalty Program */}
         <Card className="bg-gradient-to-br from-primary/5 via-transparent to-primary/10 border-none">
           <CardContent className="p-8">
             <div className="flex items-center gap-2 mb-6">
               <Trophy className="h-6 w-6 text-primary" />
-              <h4 className="text-xl font-bold">Gold Tier Benefits</h4>
+              <h4 className="text-xl font-bold">{tier} Tier Benefits</h4>
             </div>
             <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6">
               {[

@@ -1,10 +1,9 @@
 'use client';
 
-import { use } from 'react';
 import { useState } from 'react';
+import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { notFound } from 'next/navigation';
 import { 
   ArrowLeft, 
   Users, 
@@ -26,15 +25,13 @@ import { PublicLayout } from '@/components/layout/public-layout';
 import { useLocale } from '@/lib/i18n/locale-context';
 import { mockRooms } from '@/lib/mock-data';
 
-export default function RoomDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const resolvedParams = use(params);
-  const room = mockRooms.find((r) => r.id === resolvedParams.id);
+export default function RoomDetailPage() {
+  const params = useParams();
+  const router = useRouter();
+  const id = params?.id as string;
+  const room = mockRooms.find((r) => r.id === id);
   const { t, formatCurrency } = useLocale();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-
-  if (!room) {
-    notFound();
-  }
 
   const getRoomTypeLabel = (type: string) => {
     const labels: Record<string, string> = {
@@ -77,6 +74,24 @@ export default function RoomDetailPage({ params }: { params: Promise<{ id: strin
     };
     return baseImages[type] || baseImages.standard;
   };
+
+  // Room not found — show friendly page
+  if (!room) {
+    return (
+      <PublicLayout>
+        <div className="max-w-7xl mx-auto px-4 py-16 text-center">
+          <h1 className="font-serif text-3xl mb-4">Room Not Found</h1>
+          <p className="text-muted-foreground mb-8">
+            The room you are looking for does not exist or may have been removed.
+          </p>
+          <Button onClick={() => router.push('/rooms')}>
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to Rooms
+          </Button>
+        </div>
+      </PublicLayout>
+    );
+  }
 
   const images = getRoomImages(room.type);
 
@@ -154,12 +169,10 @@ export default function RoomDetailPage({ params }: { params: Promise<{ id: strin
                   <ChevronRight className="h-5 w-5" />
                 </Button>
                 {/* 360 badge */}
-                {room.panoramaImage && (
-                  <Badge className="absolute bottom-4 right-4 gap-1 cursor-pointer">
-                    <Eye className="h-3 w-3" />
-                    {t.rooms.view360}
-                  </Badge>
-                )}
+                <Badge className="absolute bottom-4 right-4 gap-1 cursor-pointer bg-black/70 text-white border-0">
+                  <Eye className="h-3 w-3" />
+                  {t.rooms.view360}
+                </Badge>
               </div>
               {/* Thumbnails */}
               <div className="flex gap-2 mt-2">
@@ -261,8 +274,8 @@ export default function RoomDetailPage({ params }: { params: Promise<{ id: strin
 
           {/* Sidebar */}
           <div className="space-y-6">
-            {/* Booking Card */}
-            <Card className="sticky top-24">
+            {/* Booking Card — scrolls normally with the page */}
+            <Card>
               <CardHeader>
                 <CardTitle className="flex items-baseline justify-between">
                   <span className="text-3xl font-semibold">{formatCurrency(room.pricePerNight)}</span>
@@ -270,15 +283,31 @@ export default function RoomDetailPage({ params }: { params: Promise<{ id: strin
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="p-4 bg-secondary/30 rounded-lg">
-                  <p className="text-sm text-muted-foreground mb-1">{t.rooms.availability}</p>
-                  <p className="font-medium text-green-600">
-                    {room.status === 'available' ? 'Available Now' : 'Currently Occupied'}
-                  </p>
-                </div>
-                <Link href={`/booking?room=${room.type}`} className="block">
-                  <Button size="lg" className="w-full">
-                    {t.rooms.bookRoom}
+                {/* Dynamic availability status */}
+                {(() => {
+                  const statusConfig: Record<string, { label: string; color: string }> = {
+                    available: { label: 'Available Now', color: 'text-green-600' },
+                    reserved: { label: 'Reserved', color: 'text-amber-600' },
+                    occupied: { label: 'Currently Occupied', color: 'text-red-600' },
+                    cleaning: { label: 'Being Cleaned', color: 'text-orange-500' },
+                    maintenance: { label: 'Under Maintenance', color: 'text-red-700' },
+                  };
+                  const cfg = statusConfig[room.status] || statusConfig.available;
+                  return (
+                    <div className="p-4 bg-secondary/30 rounded-lg">
+                      <p className="text-sm text-muted-foreground mb-1">{t.rooms.availability}</p>
+                      <p className={`font-medium ${cfg.color}`}>{cfg.label}</p>
+                    </div>
+                  );
+                })()}
+                {/* Disable booking if room is not available */}
+                <Link href={room.status === 'available' ? `/booking?room=${room.id}` : '#'} className="block">
+                  <Button 
+                    size="lg" 
+                    className="w-full"
+                    disabled={room.status !== 'available'}
+                  >
+                    {room.status === 'available' ? t.rooms.bookRoom : 'Not Available'}
                   </Button>
                 </Link>
                 <p className="text-xs text-muted-foreground text-center">

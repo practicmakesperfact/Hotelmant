@@ -55,8 +55,20 @@ export function verifyToken(token: string): AuthToken | null {
 
 // Login function
 export function login(email: string, password: string): { success: boolean; token?: string; user?: User; error?: string } {
-  const user = getUserByEmail(email);
+  // First check mock users
+  let user = getUserByEmail(email);
   
+  // If not found in mock users, check localStorage registered users
+  if (!user && typeof window !== 'undefined') {
+    try {
+      const storedUsers = JSON.parse(localStorage.getItem('habesha_hotel_users') || '[]');
+      const storedUser = storedUsers.find((u: any) => u.email === email);
+      if (storedUser) {
+        user = storedUser as User;
+      }
+    } catch {}
+  }
+
   if (!user) {
     return { success: false, error: 'User not found' };
   }
@@ -65,14 +77,25 @@ export function login(email: string, password: string): { success: boolean; toke
     return { success: false, error: 'Account is disabled' };
   }
 
-  // Check password (demo mode)
-  const expectedPassword = DEMO_PASSWORDS[email];
-  if (!expectedPassword || password !== expectedPassword) {
-    return { success: false, error: 'Invalid password' };
+  // Check demo password first, then localStorage stored passwords
+  const demoPwd = DEMO_PASSWORDS[email];
+  if (demoPwd && password === demoPwd) {
+    const token = generateToken(user);
+    return { success: true, token, user };
   }
 
-  const token = generateToken(user);
-  return { success: true, token, user };
+  // Check localStorage passwords (for newly registered users)
+  if (typeof window !== 'undefined') {
+    try {
+      const storedPasswords = JSON.parse(localStorage.getItem('habesha_hotel_passwords') || '{}');
+      if (storedPasswords[email] && password === storedPasswords[email]) {
+        const token = generateToken(user);
+        return { success: true, token, user };
+      }
+    } catch {}
+  }
+
+  return { success: false, error: 'Invalid password' };
 }
 
 // Mock registration (saves to localStorage for demo persistence)

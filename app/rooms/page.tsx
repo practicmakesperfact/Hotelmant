@@ -232,8 +232,8 @@ export default function RoomsPage() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {filteredRooms.map((room) => (
               <Card key={room.id} className="overflow-hidden group">
-                <div className="flex flex-col sm:flex-row">
-                  <div className="relative w-full sm:w-64 h-48 sm:h-auto shrink-0">
+                <div className="flex flex-col">
+                  <div className="relative w-full h-52 shrink-0">
                     <Image
                       src={getRoomImage(room.type)}
                       alt={`${getRoomTypeLabel(room.type)} Room`}
@@ -258,7 +258,7 @@ export default function RoomsPage() {
                         </h3>
                       </div>
                     </div>
-                    <p className="text-muted-foreground text-sm mb-4 line-clamp-2">
+                    <p className="text-muted-foreground text-sm mb-4 break-words whitespace-normal">
                       {room.description}
                     </p>
                     <div className="flex flex-wrap gap-4 text-sm text-muted-foreground mb-4">
@@ -283,18 +283,18 @@ export default function RoomsPage() {
                         </Badge>
                       )}
                     </div>
-                    <div className="flex items-center justify-between pt-4 border-t">
+                    <div className="flex flex-wrap items-center justify-between gap-3 pt-4 border-t">
                       <div>
                         <span className="text-2xl font-semibold">{formatCurrency(room.pricePerNight)}</span>
                         <span className="text-muted-foreground text-sm"> / {t.rooms.pricePerNight}</span>
                       </div>
-                      <div className="flex gap-2">
+                      <div className="flex flex-wrap gap-2">
                         <Link href={`/rooms/${room.id}`}>
                           <Button variant="outline" size="sm">
                             {t.rooms.viewDetails}
                           </Button>
                         </Link>
-                        <Link href={`/booking?room=${room.type}`}>
+                        <Link href={`/booking?room=${room.id}`}>
                           <Button size="sm">
                             {t.rooms.bookRoom}
                           </Button>

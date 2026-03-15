@@ -11,12 +11,24 @@ import { Separator } from "@/components/ui/separator"
 import { Badge } from "@/components/ui/badge"
 import { useLocale } from "@/lib/i18n/locale-context"
 import { mockRooms, mockServices } from "@/lib/mock-data"
-import { CalendarDays, Users, CreditCard, Check, ArrowRight, ArrowLeft, Coffee, Utensils, Car, Sparkles } from "lucide-react"
+import { CalendarDays, Users, CreditCard, Check, ArrowRight, ArrowLeft, Coffee, Utensils, Car, Sparkles, AlertCircle } from "lucide-react"
 import { format, differenceInDays, addDays } from "date-fns"
 import { useBookings } from "@/lib/hooks/use-bookings"
-import type { Booking, RoomType } from "@/lib/types"
+import type { Booking } from "@/lib/types"
 
 type BookingStep = "details" | "extras" | "payment" | "confirmation"
+
+// Helper: get Unsplash image for room type
+function getRoomImageUrl(type: string): string {
+  const images: Record<string, string> = {
+    presidential: 'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?q=80&w=800',
+    suite: 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=800',
+    deluxe: 'https://images.unsplash.com/photo-1590490360182-c33d57733427?q=80&w=800',
+    standard: 'https://images.unsplash.com/photo-1611892440504-42a792e24d32?q=80&w=800',
+    family: 'https://images.unsplash.com/photo-1566665797739-1674de7a421a?q=80&w=800',
+  };
+  return images[type] || images.standard;
+}
 
 function BookingContent() {
   const { t } = useLocale()
@@ -28,7 +40,7 @@ function BookingContent() {
   const checkOutParam = searchParams.get("checkOut")
   const guestsParam = searchParams.get("guests")
   
-  // Find room by either direct ID matching or first available of the given type
+  // Find room by ID first, then try by type as fallback
   const room = mockRooms.find(r => r.id === roomIdParam) || mockRooms.find(r => r.type === roomIdParam);
   
   const { addBooking } = useBookings()
@@ -45,13 +57,14 @@ function BookingContent() {
     phone: "",
     specialRequests: ""
   })
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
   const [paymentMethod, setPaymentMethod] = useState<"chapa" | "telebirr" | "card" | "bank_transfer">("chapa")
   const [isProcessing, setIsProcessing] = useState(false)
   const [bookingComplete, setBookingComplete] = useState(false)
   const [bookingRef, setBookingRef] = useState("")
 
   const nights = differenceInDays(new Date(checkOut), new Date(checkIn))
-  const roomTotal = room ? room.pricePerNight * nights : 0
+  const roomTotal = room ? room.pricePerNight * Math.max(nights, 1) : 0
   const servicesTotal = selectedServices.reduce((sum, serviceId) => {
     const service = mockServices.find(s => s.id === serviceId)
     return sum + (service?.price || 0)
@@ -67,9 +80,43 @@ function BookingContent() {
     { id: "confirmation", label: t.booking.confirmBooking, icon: Check }
   ]
 
+  // Validate guest details form
+  const validateGuestDetails = (): boolean => {
+    const errors: Record<string, string> = {}
+    
+    if (!guestInfo.firstName.trim()) {
+      errors.firstName = "First name is required"
+    }
+    if (!guestInfo.lastName.trim()) {
+      errors.lastName = "Last name is required"
+    }
+    if (!guestInfo.email.trim()) {
+      errors.email = "Email is required"
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(guestInfo.email)) {
+      errors.email = "Please enter a valid email address"
+    }
+    if (!guestInfo.phone.trim()) {
+      errors.phone = "Phone number is required"
+    }
+    if (!checkIn) {
+      errors.checkIn = "Check-in date is required"
+    }
+    if (!checkOut) {
+      errors.checkOut = "Check-out date is required"
+    }
+    if (nights < 1) {
+      errors.checkOut = "Check-out must be after check-in"
+    }
+
+    setFieldErrors(errors)
+    return Object.keys(errors).length === 0
+  }
+
   const handleNextStep = () => {
-    if (step === "details") setStep("extras")
-    else if (step === "extras") setStep("payment")
+    if (step === "details") {
+      if (!validateGuestDetails()) return
+      setStep("extras")
+    } else if (step === "extras") setStep("payment")
     else if (step === "payment") handlePayment()
   }
 
@@ -80,12 +127,10 @@ function BookingContent() {
 
   const handlePayment = async () => {
     setIsProcessing(true)
-    // Simulate payment processing
     await new Promise(resolve => setTimeout(resolve, 2000))
     const ref = `BK-${new Date().getFullYear()}-${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`
     setBookingRef(ref)
     
-    // Save to local storage mock backend
     if (room) {
       const selectedAddOns = selectedServices.map(serviceId => {
         const service = mockServices.find(s => s.id === serviceId)
@@ -110,7 +155,7 @@ function BookingContent() {
         checkInDate: new Date(checkIn),
         checkOutDate: new Date(checkOut),
         numberOfGuests: guests,
-        numberOfNights: nights,
+        numberOfNights: Math.max(nights, 1),
         totalAmount: total,
         paidAmount: paymentMethod === 'bank_transfer' ? 0 : total,
         status: "confirmed",
@@ -200,66 +245,132 @@ function BookingContent() {
                   <CardContent className="space-y-6">
                     <div className="grid sm:grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label htmlFor="firstName">{t.auth.firstName}</Label>
+                        <Label htmlFor="firstName">
+                          {t.auth.firstName} <span className="text-destructive">*</span>
+                        </Label>
                         <Input 
                           id="firstName" 
                           value={guestInfo.firstName}
-                          onChange={(e) => setGuestInfo(prev => ({ ...prev, firstName: e.target.value }))}
+                          onChange={(e) => {
+                            setGuestInfo(prev => ({ ...prev, firstName: e.target.value }))
+                            if (fieldErrors.firstName) setFieldErrors(prev => ({ ...prev, firstName: '' }))
+                          }}
                           placeholder="John"
+                          className={fieldErrors.firstName ? 'border-destructive' : ''}
                         />
+                        {fieldErrors.firstName && (
+                          <p className="text-xs text-destructive flex items-center gap-1">
+                            <AlertCircle className="h-3 w-3" />{fieldErrors.firstName}
+                          </p>
+                        )}
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="lastName">{t.auth.lastName}</Label>
+                        <Label htmlFor="lastName">
+                          {t.auth.lastName} <span className="text-destructive">*</span>
+                        </Label>
                         <Input 
                           id="lastName"
                           value={guestInfo.lastName}
-                          onChange={(e) => setGuestInfo(prev => ({ ...prev, lastName: e.target.value }))}
+                          onChange={(e) => {
+                            setGuestInfo(prev => ({ ...prev, lastName: e.target.value }))
+                            if (fieldErrors.lastName) setFieldErrors(prev => ({ ...prev, lastName: '' }))
+                          }}
                           placeholder="Doe"
+                          className={fieldErrors.lastName ? 'border-destructive' : ''}
                         />
+                        {fieldErrors.lastName && (
+                          <p className="text-xs text-destructive flex items-center gap-1">
+                            <AlertCircle className="h-3 w-3" />{fieldErrors.lastName}
+                          </p>
+                        )}
                       </div>
                     </div>
                     <div className="grid sm:grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label htmlFor="email">{t.auth.email}</Label>
+                        <Label htmlFor="email">
+                          {t.auth.email} <span className="text-destructive">*</span>
+                        </Label>
                         <Input 
                           id="email" 
                           type="email"
                           value={guestInfo.email}
-                          onChange={(e) => setGuestInfo(prev => ({ ...prev, email: e.target.value }))}
+                          onChange={(e) => {
+                            setGuestInfo(prev => ({ ...prev, email: e.target.value }))
+                            if (fieldErrors.email) setFieldErrors(prev => ({ ...prev, email: '' }))
+                          }}
                           placeholder="john@example.com"
+                          className={fieldErrors.email ? 'border-destructive' : ''}
                         />
+                        {fieldErrors.email && (
+                          <p className="text-xs text-destructive flex items-center gap-1">
+                            <AlertCircle className="h-3 w-3" />{fieldErrors.email}
+                          </p>
+                        )}
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="phone">{t.common.phone}</Label>
+                        <Label htmlFor="phone">
+                          {t.common.phone} <span className="text-destructive">*</span>
+                        </Label>
                         <Input 
                           id="phone"
                           value={guestInfo.phone}
-                          onChange={(e) => setGuestInfo(prev => ({ ...prev, phone: e.target.value }))}
+                          onChange={(e) => {
+                            setGuestInfo(prev => ({ ...prev, phone: e.target.value }))
+                            if (fieldErrors.phone) setFieldErrors(prev => ({ ...prev, phone: '' }))
+                          }}
                           placeholder="+251 91 234 5678"
+                          className={fieldErrors.phone ? 'border-destructive' : ''}
                         />
+                        {fieldErrors.phone && (
+                          <p className="text-xs text-destructive flex items-center gap-1">
+                            <AlertCircle className="h-3 w-3" />{fieldErrors.phone}
+                          </p>
+                        )}
                       </div>
                     </div>
                     <Separator />
                     <div className="grid sm:grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label htmlFor="checkIn">{t.booking.checkIn}</Label>
+                        <Label htmlFor="checkIn">
+                          {t.booking.checkIn} <span className="text-destructive">*</span>
+                        </Label>
                         <Input 
                           id="checkIn" 
                           type="date"
                           value={checkIn}
-                          onChange={(e) => setCheckIn(e.target.value)}
+                          onChange={(e) => {
+                            setCheckIn(e.target.value)
+                            if (fieldErrors.checkIn) setFieldErrors(prev => ({ ...prev, checkIn: '' }))
+                          }}
                           min={format(new Date(), "yyyy-MM-dd")}
+                          className={fieldErrors.checkIn ? 'border-destructive' : ''}
                         />
+                        {fieldErrors.checkIn && (
+                          <p className="text-xs text-destructive flex items-center gap-1">
+                            <AlertCircle className="h-3 w-3" />{fieldErrors.checkIn}
+                          </p>
+                        )}
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="checkOut">{t.booking.checkOut}</Label>
+                        <Label htmlFor="checkOut">
+                          {t.booking.checkOut} <span className="text-destructive">*</span>
+                        </Label>
                         <Input 
                           id="checkOut"
                           type="date"
                           value={checkOut}
-                          onChange={(e) => setCheckOut(e.target.value)}
+                          onChange={(e) => {
+                            setCheckOut(e.target.value)
+                            if (fieldErrors.checkOut) setFieldErrors(prev => ({ ...prev, checkOut: '' }))
+                          }}
                           min={checkIn}
+                          className={fieldErrors.checkOut ? 'border-destructive' : ''}
                         />
+                        {fieldErrors.checkOut && (
+                          <p className="text-xs text-destructive flex items-center gap-1">
+                            <AlertCircle className="h-3 w-3" />{fieldErrors.checkOut}
+                          </p>
+                        )}
                       </div>
                     </div>
                     <div className="space-y-2">
@@ -285,7 +396,10 @@ function BookingContent() {
                       />
                     </div>
                   </CardContent>
-                  <CardFooter>
+                  <CardFooter className="flex justify-between items-center">
+                    <p className="text-xs text-muted-foreground">
+                      <span className="text-destructive">*</span> Required fields
+                    </p>
                     <Button onClick={handleNextStep} className="ml-auto">
                       Continue <ArrowRight className="ml-2 h-4 w-4" />
                     </Button>
@@ -301,7 +415,7 @@ function BookingContent() {
                   </CardHeader>
                   <CardContent>
                     <div className="grid gap-4">
-                      {mockServices.filter(s => s.isAvailable).map(service => {
+                      {mockServices.filter(s => s.isAvailable && s.price > 0).map(service => {
                         const isSelected = selectedServices.includes(service.id)
                         const IconComponent = (service.category === "restaurant" || service.category === "room_service") ? Utensils :
                           service.category === "transport" ? Car :
@@ -435,7 +549,7 @@ function BookingContent() {
                     <div className="text-left space-y-4">
                       <div className="flex justify-between py-2 border-b">
                         <span className="text-muted-foreground">Room</span>
-                        <span className="font-medium capitalize">{room.type}</span>
+                        <span className="font-medium capitalize">{room.type} — Room {room.roomNumber}</span>
                       </div>
                       <div className="flex justify-between py-2 border-b">
                         <span className="text-muted-foreground">Check-in</span>
@@ -458,7 +572,7 @@ function BookingContent() {
                       A confirmation email has been sent to {guestInfo.email}
                     </p>
                   </CardContent>
-                  <CardFooter className="flex flex-col gap-4">
+                  <CardFooter className="flex flex-col gap-3">
                     <Button onClick={() => router.push("/")} className="w-full">
                       Return to Home
                     </Button>
@@ -477,9 +591,10 @@ function BookingContent() {
                   <CardTitle className="text-lg">{t.booking.reviewBooking}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
+                  {/* Room image — uses Unsplash URL based on type */}
                   <div className="aspect-video rounded-lg overflow-hidden bg-muted">
                     <img 
-                      src={room.images[0] || "/placeholder.svg"} 
+                      src={getRoomImageUrl(room.type)}
                       alt={`${room.type} room`}
                       className="w-full h-full object-cover"
                     />
@@ -502,7 +617,7 @@ function BookingContent() {
                   <Separator />
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
-                      <span>ETB {room.pricePerNight.toLocaleString()} x {nights} nights</span>
+                      <span>ETB {room.pricePerNight.toLocaleString()} x {Math.max(nights, 1)} nights</span>
                       <span>ETB {roomTotal.toLocaleString()}</span>
                     </div>
                     {selectedServices.length > 0 && (

@@ -303,6 +303,38 @@ export const am = {
     waitingConfirmation: 'ማረጋገጫ በመጠበቅ ላይ...',
   },
   
+  contact: {
+    address: 'አድራሻ',
+    phone: 'ስልክ',
+    email: 'ኢሜይል',
+    hours: 'የሥራ ሰዓታት',
+    getInTouch: 'ያግኙን',
+    title: 'አግኙን',
+    subtitle: 'ማንኛውንም ጥያቄዎ ለመመለስ ዝግጁ ነን። ከእርስዎ ለመስማት እንጠብቃለን።',
+    sendMessage: 'መልዕክት ይላኩ',
+    name: 'ሙሉ ስም',
+    subject: 'ርዕሰ ጉዳይ',
+    message: 'መልዕክትዎ',
+    send: 'መልዕክት ላክ',
+  },
+
+  about: {
+    yearsExperience: 'ዓመታት ልምድ',
+    guestsServed: 'እንግዶች አገልግሏቸዋል',
+    rating: 'አማካይ ደረጃ',
+    location: 'አድራሻ',
+    established: 'የተቋቋመ',
+    title: 'ስለ ልዑል መኮንን ሆቴል',
+    subtitle: 'ባህላዊ የኢትዮጵያ ሞቅ ያለ እና ዘመናዊ ቅንጦት ሆስፒታሊቲ ፍጹም ቅልቅልን ይለማመዱ።',
+    ourStory: 'ታሪካችን',
+    storyTitle: 'የብቃት ውርስ',
+    amenities: 'አገልግሎቶቻችን',
+    amenitiesTitle: 'ዓለም ደረጃ አገልግሎቶች',
+    team: 'የአስተዳደር ቡድን',
+    teamTitle: 'አመራራችንን ያግኙ',
+    locationTitle: 'ዋና ቦታ',
+  },
+
   footer: {
     quickLinks: 'ፈጣን አገናኞች',
     services: 'አገልግሎቶች',

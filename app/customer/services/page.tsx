@@ -5,6 +5,7 @@ import { DashboardLayout } from "@/components/layout/dashboard-layout"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { useLocale } from "@/lib/i18n/locale-context"
 import { 
   Sparkles, 
   Utensils, 
@@ -20,6 +21,7 @@ import { mockServices } from "@/lib/mock-data"
 
 export default function CustomerServicesPage() {
   const [selectedCategory, setSelectedCategory] = useState<string>("all")
+  const { t } = useLocale()
 
   const categories = [
     { id: "all", label: "All Services", icon: Sparkles },
@@ -34,7 +36,7 @@ export default function CustomerServicesPage() {
   )
 
   return (
-    <DashboardLayout requiredRoles={["customer"]} title="Experience Our Services">
+    <DashboardLayout requiredRoles={["customer"]} title={t.customer.roomService}>
       <div className="space-y-8">
         {/* Category Selection */}
         <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">

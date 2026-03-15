@@ -2,9 +2,11 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowRight, Star, Wifi, Car, Utensils, Dumbbell, Sparkles, Clock } from 'lucide-react';
+import { useRef } from 'react';
+import { ArrowRight, Star, Wifi, Car, Utensils, Dumbbell, Sparkles, Clock, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { PublicLayout } from '@/components/layout/public-layout';
 import { useLocale } from '@/lib/i18n/locale-context';
 import { mockRooms } from '@/lib/mock-data';
@@ -57,6 +59,17 @@ export default function HomePage() {
     return labels[type] || type;
   };
 
+  const getRoomImageUrl = (type: string) => {
+    const images: Record<string, string> = {
+      presidential: 'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?q=80&w=800',
+      suite: 'https://images.unsplash.com/photo-1590490360182-c33d57733427?q=80&w=800',
+      deluxe: 'https://images.unsplash.com/photo-1611892440504-42a792e24d32?q=80&w=800',
+      standard: 'https://images.unsplash.com/photo-1611892440504-42a792e24d32?q=80&w=800',
+      family: 'https://images.unsplash.com/photo-1566665797739-1674de7a421a?q=80&w=800',
+    };
+    return images[type] || images.standard;
+  };
+
   return (
     <PublicLayout>
       {/* Hero Section */}
@@ -79,7 +92,8 @@ export default function HomePage() {
             {t.landing.heroSubtitle}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/booking">
+            {/* BOOK NOW now goes to /rooms so user selects a room first */}
+            <Link href="/rooms">
               <Button size="lg" className="text-lg px-8">
                 {t.landing.bookNow}
                 <ArrowRight className="ml-2 h-5 w-5" />
@@ -100,7 +114,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Featured Rooms */}
+      {/* Featured Rooms — 3D hover cards */}
       <section className="py-20 px-4 bg-background">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12">
@@ -109,42 +123,17 @@ export default function HomePage() {
               From elegant suites to luxurious presidential accommodations, find your perfect retreat
             </p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" style={{ perspective: '1200px' }}>
             {featuredRooms.map((room) => (
-              <Card key={room.id} className="overflow-hidden group cursor-pointer hover:shadow-xl transition-shadow">
-                <div className="relative h-64 overflow-hidden">
-                  <Image
-                    src={`https://images.unsplash.com/photo-${room.type === 'presidential' ? '1631049307264-da0ec9d70304' : room.type === 'suite' ? '1590490360182-c33d57733427' : '1611892440504-42a792e24d32'}?q=80&w=800`}
-                    alt={`${getRoomTypeLabel(room.type)} Room`}
-                    fill
-                    className="object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
-                  <div className="absolute top-4 left-4">
-                    <span className="bg-primary text-primary-foreground px-3 py-1 text-sm rounded-full">
-                      {getRoomTypeLabel(room.type)}
-                    </span>
-                  </div>
-                </div>
-                <CardContent className="p-6">
-                  <h3 className="font-serif text-xl mb-2">
-                    {getRoomTypeLabel(room.type)} Room
-                  </h3>
-                  <p className="text-muted-foreground text-sm mb-4 line-clamp-2">
-                    {room.description}
-                  </p>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <span className="text-2xl font-semibold">{formatCurrency(room.pricePerNight)}</span>
-                      <span className="text-muted-foreground text-sm"> / {t.rooms.pricePerNight}</span>
-                    </div>
-                    <Link href={`/rooms/${room.id}`}>
-                      <Button variant="outline" size="sm">
-                        {t.rooms.viewDetails}
-                      </Button>
-                    </Link>
-                  </div>
-                </CardContent>
-              </Card>
+              <RoomCard3D
+                key={room.id}
+                room={room}
+                label={getRoomTypeLabel(room.type)}
+                imageUrl={getRoomImageUrl(room.type)}
+                price={formatCurrency(room.pricePerNight)}
+                priceLabel={t.rooms.pricePerNight}
+                viewDetailsLabel={t.rooms.viewDetails}
+              />
             ))}
           </div>
           <div className="text-center mt-10">
@@ -224,7 +213,7 @@ export default function HomePage() {
           <p className="text-primary-foreground/80 mb-8 max-w-2xl mx-auto">
             Book your stay now and discover why Leul Mekonen Hotel is the premier destination in Kombolcha
           </p>
-          <Link href="/booking">
+          <Link href="/rooms">
             <Button size="lg" variant="secondary" className="text-lg px-8">
               {t.landing.bookNow}
               <ArrowRight className="ml-2 h-5 w-5" />
@@ -233,5 +222,100 @@ export default function HomePage() {
         </div>
       </section>
     </PublicLayout>
+  );
+}
+
+// 3D Tilt Card Component for Featured Rooms
+function RoomCard3D({
+  room,
+  label,
+  imageUrl,
+  price,
+  priceLabel,
+  viewDetailsLabel,
+}: {
+  room: any;
+  label: string;
+  imageUrl: string;
+  price: string;
+  priceLabel: string;
+  viewDetailsLabel: string;
+}) {
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const card = cardRef.current;
+    if (!card) return;
+    const rect = card.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+    const rotateX = ((y - centerY) / centerY) * -10;
+    const rotateY = ((x - centerX) / centerX) * 10;
+    card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.03, 1.03, 1.03)`;
+  };
+
+  const handleMouseLeave = () => {
+    const card = cardRef.current;
+    if (!card) return;
+    card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
+  };
+
+  return (
+    <div
+      ref={cardRef}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      style={{
+        transformStyle: 'preserve-3d',
+        transition: 'transform 0.15s ease-out',
+        willChange: 'transform',
+        borderRadius: '0.75rem',
+      }}
+      className="overflow-hidden shadow-lg hover:shadow-2xl cursor-pointer bg-card border border-border"
+    >
+      <div className="relative h-64 overflow-hidden">
+        <Image
+          src={imageUrl}
+          alt={`${label} Room`}
+          fill
+          className="object-cover"
+        />
+        {/* Gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+        {/* Room type badge */}
+        <div className="absolute top-4 left-4">
+          <span className="bg-primary text-primary-foreground px-3 py-1 text-sm rounded-full font-medium">
+            {label}
+          </span>
+        </div>
+        {/* 360° badge */}
+        <div className="absolute top-4 right-4">
+          <Badge className="gap-1 bg-black/60 text-white border-0">
+            <Eye className="h-3 w-3" />
+            360°
+          </Badge>
+        </div>
+        {/* Floating price at bottom of image */}
+        <div className="absolute bottom-4 left-4 right-4 flex items-end justify-between">
+          <div>
+            <span className="text-white text-2xl font-bold">{price}</span>
+            <span className="text-white/70 text-sm ml-1">/ {priceLabel}</span>
+          </div>
+        </div>
+      </div>
+      <div className="p-5">
+        <h3 className="font-serif text-xl mb-2">{label} Room</h3>
+        <p className="text-muted-foreground text-sm mb-4 line-clamp-2">
+          {room.description}
+        </p>
+        <Link href={`/rooms/${room.id}`} className="block">
+          <Button variant="outline" size="sm" className="w-full">
+            {viewDetailsLabel}
+          </Button>
+        </Link>
+      </div>
+    </div>
   );
 }

@@ -303,6 +303,38 @@ export const om = {
     waitingConfirmation: 'Mirkaneeffama eegaa jira...',
   },
   
+  contact: {
+    address: 'Teessoo',
+    phone: 'Bilbila',
+    email: 'Imeelii',
+    hours: 'Sa\'aatii Hojii',
+    getInTouch: 'Nu Quunnamaa',
+    title: 'Nu Quunnamaa',
+    subtitle: 'Gaaffii kamiifuu deebii kennuuf qophii dha. Isin dhagahuuf hawwina.',
+    sendMessage: 'Ergaa Ergi',
+    name: 'Maqaa Guutuu',
+    subject: 'Mata Duree',
+    message: 'Ergaa Keessan',
+    send: 'Ergaa Ergi',
+  },
+
+  about: {
+    yearsExperience: 'Waggaawwan Muuxannoo',
+    guestsServed: 'Keessummoota Tajaajilaman',
+    rating: 'Deeggarsaa Giddugaleessa',
+    location: 'Teessoo',
+    established: 'Hundeeffame',
+    title: 'Waa\'ee Leul Mekonen Hotel',
+    subtitle: 'Makma\'oo sirrii ho\'a aadaa Itoophiyaa fi keessummeessaa qanaanii ammayyaa muuxadhaa.',
+    ourStory: 'Seenaa Keenya',
+    storyTitle: 'Dhaalewwan Ol\'aanummaa',
+    amenities: 'Tajaajilaawwan Keenya',
+    amenitiesTitle: 'Tajaajila Sadarkaa Addunyaa',
+    team: 'Garee Bulchiinsaa',
+    teamTitle: 'Hoggantoota Keenya Bari\'aa',
+    locationTitle: 'Bakka Ol\'aanaa',
+  },
+
   footer: {
     quickLinks: 'Liinkota Ariifataa',
     services: 'Tajaajilaawwan',
