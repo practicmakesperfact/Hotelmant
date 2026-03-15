@@ -348,6 +348,33 @@ export const en = {
     privacyPolicy: 'Privacy Policy',
     termsOfService: 'Terms of Service',
   },
+
+  restaurant: {
+    title: 'Leul Mekonen Restaurant',
+    subtitle: 'Fine dining with Ethiopian and International specialties',
+    searchPlaceholder: 'Search for dishes...',
+    allCategories: 'All Categories',
+    addToOrder: 'Add to Order',
+    quickAdd: 'Quick Add',
+    viewDetails: 'View Details',
+    ingredients: 'Ingredients',
+    portionSize: 'Portion Size',
+    prepTime: 'Preparation Time',
+    calories: 'Approx. calories',
+    vegetarian: 'Vegetarian',
+    spicy: 'Spicy',
+    addedToCart: 'Added to your order!',
+    categories: {
+      ethiopian: 'Ethiopian',
+      international: 'International',
+      appetizer: 'Appetizers',
+      main_course: 'Main Course',
+      dessert: 'Desserts',
+      beverage: 'Beverages',
+      breakfast: 'Breakfast',
+      snack: 'Snacks',
+    },
+  },
 };
 
 export type TranslationKey = typeof en;

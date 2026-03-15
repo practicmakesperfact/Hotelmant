@@ -28,25 +28,33 @@ import {
 import { mockMenuItems } from "@/lib/mock-data"
 import { FoodCategory } from "@/lib/types"
 import { useLocale } from "@/lib/i18n/locale-context"
+import { toast } from "sonner"
 
 export default function RestaurantPage() {
-  const { t } = useLocale()
+  const { t, locale } = useLocale()
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedCategory, setSelectedCategory] = useState<FoodCategory | 'all'>('all')
   const [selectedItem, setSelectedItem] = useState<typeof mockMenuItems[0] | null>(null)
   const [showDetails, setShowDetails] = useState(false)
 
   const categories: { label: string, value: FoodCategory | 'all' }[] = [
-    { label: 'All', value: 'all' },
-    { label: 'Ethiopian', value: 'ethiopian' },
-    { label: 'International', value: 'international' },
-    { label: 'Main Course', value: 'main_course' },
-    { label: 'Beverages', value: 'beverage' },
-    { label: 'Breakfast', value: 'breakfast' },
+    { label: t.restaurant?.allCategories || 'All', value: 'all' },
+    { label: t.restaurant?.categories.ethiopian || 'Ethiopian', value: 'ethiopian' },
+    { label: t.restaurant?.categories.international || 'International', value: 'international' },
+    { label: t.restaurant?.categories.main_course || 'Main Course', value: 'main_course' },
+    { label: t.restaurant?.categories.beverage || 'Beverages', value: 'beverage' },
+    { label: t.restaurant?.categories.breakfast || 'Breakfast', value: 'breakfast' },
   ]
 
+  const getItemName = (item: typeof mockMenuItems[0]) => {
+    if (locale === 'am') return item.nameAm || item.name
+    if (locale === 'om') return item.nameOm || item.name
+    return item.name
+  }
+
   const filteredItems = mockMenuItems.filter(item => {
-    const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    const itemName = getItemName(item).toLowerCase()
+    const matchesSearch = itemName.includes(searchTerm.toLowerCase()) || 
                          item.description.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesCategory = selectedCategory === 'all' || item.foodCategory === selectedCategory
     return matchesSearch && matchesCategory
@@ -57,6 +65,18 @@ export default function RestaurantPage() {
     setShowDetails(true)
   }
 
+  const handleAddToOrder = (item: typeof mockMenuItems[0]) => {
+    // Logic for adding to order would go here
+    toast.success(t.restaurant?.addedToCart || 'Added to your order!', {
+      description: `${getItemName(item)} has been added to your selection.`,
+      action: {
+        label: t.common.view || 'View',
+        onClick: () => console.log("View cart")
+      }
+    })
+    setShowDetails(false)
+  }
+
   return (
     <PublicLayout>
       <div className="min-h-screen bg-secondary/30 py-12">
@@ -64,7 +84,7 @@ export default function RestaurantPage() {
           <div className="text-center max-w-3xl mx-auto mb-12">
             <h1 className="text-4xl font-serif font-bold mb-4">{t.restaurant?.title || 'Leul Mekonen Restaurant'}</h1>
             <p className="text-muted-foreground text-lg">
-              Experience the finest Ethiopian and International cuisine, prepared with the freshest local ingredients.
+              {t.restaurant?.subtitle || 'Fine dining with Ethiopian and International specialties'}
             </p>
           </div>
 
@@ -73,7 +93,7 @@ export default function RestaurantPage() {
             <div className="relative w-full md:w-96">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input 
-                placeholder="Search dishes, ingredients..." 
+                placeholder={t.restaurant?.searchPlaceholder || "Search dishes..."} 
                 className="pl-9 bg-background"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
@@ -103,18 +123,18 @@ export default function RestaurantPage() {
                 <div className="relative aspect-[4/3] overflow-hidden">
                   <img 
                     src={item.image} 
-                    alt={item.name}
+                    alt={getItemName(item)}
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                   />
                   <div className="absolute top-3 right-3 flex gap-2">
                     {item.isVegetarian && (
                       <Badge className="bg-green-500/90 text-white border-none backdrop-blur-sm">
-                        <Leaf className="h-3 w-3 mr-1" /> Veg
+                        <Leaf className="h-3 w-3 mr-1" /> {t.restaurant?.vegetarian || 'Veg'}
                       </Badge>
                     )}
                     {item.isSpicy && (
                       <Badge className="bg-red-500/90 text-white border-none backdrop-blur-sm">
-                        <Flame className="h-3 w-3 mr-1" /> Spicy
+                        <Flame className="h-3 w-3 mr-1" /> {t.restaurant?.spicy || 'Spicy'}
                       </Badge>
                     )}
                   </div>
@@ -126,7 +146,7 @@ export default function RestaurantPage() {
                 <CardHeader className="pb-2">
                   <div className="flex justify-between items-start">
                     <div>
-                      <CardTitle className="text-xl group-hover:text-primary transition-colors">{item.name}</CardTitle>
+                      <CardTitle className="text-xl group-hover:text-primary transition-colors">{getItemName(item)}</CardTitle>
                       <CardDescription className="line-clamp-2 mt-1">{item.description}</CardDescription>
                     </div>
                   </div>
@@ -147,10 +167,10 @@ export default function RestaurantPage() {
                 
                 <CardFooter className="pt-0 border-t bg-secondary/10 flex gap-2 p-4">
                   <Button variant="outline" size="sm" className="flex-1" onClick={() => handleViewDetails(item)}>
-                    <Info className="h-4 w-4 mr-2" /> Details
+                    <Info className="h-4 w-4 mr-2" /> {t.restaurant?.viewDetails || 'Details'}
                   </Button>
-                  <Button size="sm" className="flex-1">
-                    <Plus className="h-4 w-4 mr-2" /> Add
+                  <Button size="sm" className="flex-1" onClick={() => handleAddToOrder(item)}>
+                    <Plus className="h-4 w-4 mr-2" /> {t.restaurant?.quickAdd || 'Add'}
                   </Button>
                 </CardFooter>
               </Card>
@@ -160,7 +180,7 @@ export default function RestaurantPage() {
           {filteredItems.length === 0 && (
             <div className="text-center py-24 bg-background rounded-3xl border-2 border-dashed">
               <Utensils className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-20" />
-              <h3 className="text-xl font-medium mb-1">No dishes found</h3>
+              <h3 className="text-xl font-medium mb-1">{t.rooms?.searchPlaceholder || 'No items found'}</h3>
               <p className="text-muted-foreground">Try adjusting your search or filters.</p>
             </div>
           )}
@@ -174,18 +194,20 @@ export default function RestaurantPage() {
             <div className="relative aspect-square md:aspect-auto">
               <img 
                 src={selectedItem?.image} 
-                alt={selectedItem?.name}
+                alt={selectedItem ? getItemName(selectedItem) : ''}
                 className="w-full h-full object-cover"
               />
             </div>
             <div className="p-6 flex flex-col">
               <DialogHeader className="mb-4">
                 <div className="flex items-center gap-2 mb-2">
-                  <Badge variant="secondary" className="capitalize">{selectedItem?.foodCategory.replace('_', ' ')}</Badge>
-                  {selectedItem?.isVegetarian && <Badge className="bg-green-500 text-white"><Leaf className="h-3 w-3 mr-1" /> Veg</Badge>}
-                  {selectedItem?.isSpicy && <Badge className="bg-red-500 text-white"><Flame className="h-3 w-3 mr-1" /> Spicy</Badge>}
+                  <Badge variant="secondary" className="capitalize">
+                    {selectedItem ? (t.restaurant?.categories[selectedItem.foodCategory as keyof typeof t.restaurant.categories] || selectedItem.foodCategory.replace('_', ' ')) : ''}
+                  </Badge>
+                  {selectedItem?.isVegetarian && <Badge className="bg-green-500 text-white"><Leaf className="h-3 w-3 mr-1" /> {t.restaurant?.vegetarian || 'Veg'}</Badge>}
+                  {selectedItem?.isSpicy && <Badge className="bg-red-500 text-white"><Flame className="h-3 w-3 mr-1" /> {t.restaurant?.spicy || 'Spicy'}</Badge>}
                 </div>
-                <DialogTitle className="text-3xl font-serif">{selectedItem?.name}</DialogTitle>
+                <DialogTitle className="text-3xl font-serif">{selectedItem ? getItemName(selectedItem) : ''}</DialogTitle>
                 <DialogDescription className="text-sm">
                   {selectedItem?.description}
                 </DialogDescription>
@@ -193,7 +215,7 @@ export default function RestaurantPage() {
 
               <div className="space-y-4 flex-1">
                 <div>
-                  <h4 className="text-sm font-semibold mb-2">Ingredients</h4>
+                  <h4 className="text-sm font-semibold mb-2">{t.restaurant?.ingredients || 'Ingredients'}</h4>
                   <div className="flex flex-wrap gap-2">
                     {selectedItem?.ingredients.map(ing => (
                       <Badge key={ing} variant="outline" className="font-normal text-xs">{ing}</Badge>
@@ -203,14 +225,14 @@ export default function RestaurantPage() {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="p-3 bg-secondary/20 rounded-xl">
-                    <p className="text-xs text-muted-foreground mb-1">Portion Size</p>
+                    <p className="text-xs text-muted-foreground mb-1">{t.restaurant?.portionSize || 'Portion Size'}</p>
                     <p className="font-semibold flex items-center gap-2">
                       <Utensils className="h-4 w-4 text-primary" />
                       {selectedItem?.portionSize}
                     </p>
                   </div>
                   <div className="p-3 bg-secondary/20 rounded-xl">
-                    <p className="text-xs text-muted-foreground mb-1">Prep Time</p>
+                    <p className="text-xs text-muted-foreground mb-1">{t.restaurant?.prepTime || 'Prep Time'}</p>
                     <p className="font-semibold flex items-center gap-2">
                       <Clock className="h-4 w-4 text-primary" />
                       {selectedItem?.preparationTime} min
@@ -220,18 +242,18 @@ export default function RestaurantPage() {
                 
                 {selectedItem?.calories && (
                   <div className="text-xs text-muted-foreground">
-                    Approx. {selectedItem.calories} calories per serving
+                    {t.restaurant?.calories || 'Approx. calories'}: {selectedItem.calories}
                   </div>
                 )}
               </div>
 
               <div className="mt-8 pt-6 border-t flex items-center justify-between">
                 <div>
-                  <p className="text-xs text-muted-foreground">Price</p>
+                  <p className="text-xs text-muted-foreground">{t.common.price || 'Price'}</p>
                   <p className="text-2xl font-bold text-primary">ETB {selectedItem?.price.toLocaleString()}</p>
                 </div>
-                <Button className="rounded-full px-8 h-12 shadow-lg shadow-primary/25">
-                  <ShoppingCart className="h-4 w-4 mr-2" /> Add to Order
+                <Button className="rounded-full px-8 h-12 shadow-lg shadow-primary/25" onClick={() => selectedItem && handleAddToOrder(selectedItem)}>
+                  <ShoppingCart className="h-4 w-4 mr-2" /> {t.restaurant?.addToOrder || 'Add to Order'}
                 </Button>
               </div>
             </div>
