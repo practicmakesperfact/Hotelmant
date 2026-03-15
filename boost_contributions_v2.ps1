@@ -15,8 +15,8 @@ $batchSize = [Math]::Ceiling($fileCount / 30)
 
 if ($batchSize -lt 1) { $batchSize = 1 }
 
-git config user.email "user@example.com"
-git config user.name "Project Contributor"
+git config user.email "hasmare463@gmail.com"
+git config user.name "Haymanot"
 
 for ($i = 0; $i -lt 30; $i++) {
     $start = $i * $batchSize

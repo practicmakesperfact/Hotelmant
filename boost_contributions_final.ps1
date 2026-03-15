@@ -7,8 +7,8 @@ if (Test-Path .git) {
 }
 git init
 git remote add origin https://github.com/practicmakesperfact/hotelMant.git
-git config user.email "user@example.com"
-git config user.name "Project Contributor"
+git config user.email "hasmare463@gmail.com"
+git config user.name "Haymanot"
 
 # Get all files and filter them using .gitignore patterns manually to be safe for the list
 # but git add will also respect .gitignore.
