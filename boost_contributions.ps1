@@ -1,26 +1,29 @@
+# Set correct Git identity
+git config user.email "hasmare463@gmail.com"
+git config user.name "Haymanot"
 
-$env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
-
-# Ensure git is initialized and remote added
-if (-not (Test-Path .git)) {
+# Initialize git if needed
+if (!(Test-Path ".git")) {
     git init
 }
 
-# Check if origin exists, if not add it
+# Ensure remote exists
 $remotes = git remote
 if ($remotes -notcontains "origin") {
     git remote add origin https://github.com/practicmakesperfact/hotelMant.git
 }
 
-# 30 commits strategy: Add a small line to README.md each time
-for ($i = 1; $i -le 30; $i++) {
-    $content = "`n<!-- contribution check $i -->"
-    Add-Content -Path "README.md" -Value $content
-    git add README.md
-    git commit -m "Enhance README.md with additional project information - step $i"
+# Make sure README exists
+if (!(Test-Path "README.md")) {
+    New-Item README.md
 }
 
-# Final push
-# Note: User might need to provide credentials if not cached/configured
-# Using -f to ensure push if it's a fresh repository as requested
-git push -u origin master -f
+# Create 30 commits
+for ($i = 1; $i -le 30; $i++) {
+    Add-Content README.md "`nContribution update $i"
+    git add README.md
+    git commit -m "Update project documentation step $i"
+}
+
+# Push to GitHub
+git push -u origin master
