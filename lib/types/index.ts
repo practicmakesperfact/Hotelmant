@@ -158,7 +158,7 @@ export interface Service {
   image?: string;
 }
 
-export type FoodCategory = 'appetizer' | 'main_course' | 'dessert' | 'beverage' | 'ethiopian' | 'international' | 'breakfast' | 'snack';
+export type FoodCategory = 'appetizer' | 'main_course' | 'dessert' | 'beverage' | 'ethiopian' | 'international' | 'breakfast' | 'snack' | 'juice_fruit' | 'alcoholic_beverage' | 'hot_drinks' | 'water';
 
 export interface MenuItem extends Service {
   category: 'restaurant';

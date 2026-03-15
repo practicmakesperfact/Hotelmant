@@ -41,8 +41,11 @@ export default function RestaurantPage() {
     { label: t.restaurant?.allCategories || 'All', value: 'all' },
     { label: t.restaurant?.categories.ethiopian || 'Ethiopian', value: 'ethiopian' },
     { label: t.restaurant?.categories.international || 'International', value: 'international' },
+    { label: t.restaurant?.categories.juice_fruit || 'Juice & Fruit', value: 'juice_fruit' },
+    { label: t.restaurant?.categories.alcoholic_beverage || 'Alcoholic', value: 'alcoholic_beverage' },
+    { label: t.restaurant?.categories.hot_drinks || 'Hot Drinks', value: 'hot_drinks' },
+    { label: t.restaurant?.categories.water || 'Water', value: 'water' },
     { label: t.restaurant?.categories.main_course || 'Main Course', value: 'main_course' },
-    { label: t.restaurant?.categories.beverage || 'Beverages', value: 'beverage' },
     { label: t.restaurant?.categories.breakfast || 'Breakfast', value: 'breakfast' },
   ]
 

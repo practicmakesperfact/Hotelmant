@@ -373,6 +373,10 @@ export const en = {
       beverage: 'Beverages',
       breakfast: 'Breakfast',
       snack: 'Snacks',
+      juice_fruit: 'Juice & Fruit',
+      alcoholic_beverage: 'Alcoholic Beverages',
+      hot_drinks: 'Hot Drinks (Tekus)',
+      water: 'Water',
     },
   },
 };

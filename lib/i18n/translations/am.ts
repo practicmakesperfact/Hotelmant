@@ -373,6 +373,10 @@ export const am = {
       beverage: 'መጠጥ',
       breakfast: 'ቁርስ',
       snack: 'ቀለል ያለ ምግብ',
+      juice_fruit: 'ጭማቂ እና ፍራፍሬ',
+      alcoholic_beverage: 'የአልኮል መጠጦች',
+      hot_drinks: 'ትኩስ ነገሮች',
+      water: 'ውሃ',
     },
   },
 };

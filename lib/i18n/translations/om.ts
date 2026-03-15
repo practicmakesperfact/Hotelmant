@@ -373,6 +373,10 @@ export const om = {
       beverage: 'Dhugaatii',
       breakfast: 'Ciree',
       snack: 'Snack',
+      juice_fruit: 'Juusii fi Furaatiraa',
+      alcoholic_beverage: 'Dhugaatii Alkolii',
+      hot_drinks: 'Dhugaatii Ho’aa',
+      water: 'Bishaan',
     },
   },
 };
