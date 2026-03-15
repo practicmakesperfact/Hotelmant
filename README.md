@@ -6,6 +6,8 @@ A comprehensive, modern Hotel Management System built for **Leul Mekonen Hotel**
 
 ### 🌟 For Guests
 - **Dynamic Booking System**: Easy-to-use interface for selecting and booking various room types.
+- `app/restaurant`: Premium food gallery and ordering.
+  - `components/layout`: Responsive headers and footer with theme switching.
 - **Room Showcase**: Stunning visuals and detailed descriptions of Standard, Deluxe, Suite, and Presidential rooms.
 - **User Dashboard**: Manage profiles, view booking history, and handle cancellations.
 - **Multi-language Support**: Experience the platform in multiple languages (English and Amharic).
@@ -16,6 +18,10 @@ A comprehensive, modern Hotel Management System built for **Leul Mekonen Hotel**
 - **Inventory Management**: Track hotel supplies and equipment efficiently.
 - **Manager Reports**: Visualized data and analytics for hotel performance oversight.
 - **Admin Dashboard**: Comprehensive control over staff, rooms, and system settings.
+- 🌍 **International Ready**: Full support for English, Amharic, and Afaan Oromo.
+- 🌓 **Dynamic Theme**: Seamlessly switch between Light and Dark modes.
+- 🍽️ **Premium Dining**: Interactive restaurant menu with detailed ingredients and portion sizes.
+- 📱 **Mobile First**: Fully responsive design optimized for all screen sizes.
 
 ## 🚀 Tech Stack
 

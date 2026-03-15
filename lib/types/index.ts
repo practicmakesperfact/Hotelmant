@@ -136,7 +136,7 @@ export interface BookingAddOn {
 }
 
 // Services
-export type ServiceCategory = 'room_service' | 'laundry' | 'spa' | 'restaurant' | 'transport' | 'other';
+export type ServiceCategory = 'room_service' | 'laundry' | 'spa' | 'restaurant' | 'transport' | 'other' | 'food';
 export type ServiceRequestStatus = 'pending' | 'in_progress' | 'completed' | 'cancelled';
 
 export type ChargeType = 'per_person' | 'per_stay' | 'per_hour' | 'per_item' | 'free';
@@ -156,6 +156,19 @@ export interface Service {
     end: string;
   };
   image?: string;
+}
+
+export type FoodCategory = 'appetizer' | 'main_course' | 'dessert' | 'beverage' | 'ethiopian' | 'international' | 'breakfast' | 'snack';
+
+export interface MenuItem extends Service {
+  category: 'restaurant';
+  foodCategory: FoodCategory;
+  ingredients: string[];
+  portionSize: string; // e.g., "500g", "Regular", "Large"
+  calories?: number;
+  isVegetarian: boolean;
+  isSpicy: boolean;
+  preparationTime: number; // minutes
 }
 
 export interface ServiceRequest {

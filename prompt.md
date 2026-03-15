@@ -1,6 +1,7 @@
 Build a **full Hotel Management System web application** for managing **one hotel** with a modern UI, secure backend, and **role-based access control**. The system should manage **rooms, bookings, customers, employees, restaurant/kitchen, housekeeping, payments, gallery, services, reports, and inventory**.
 
-The platform must support **multi-language (English and Amharic)** and allow users to switch languages easily.
+The platform must support- **Restaurant & Dining**: Interactive food gallery at `/restaurant` with detailed ingredients, portion sizes, and diet-friendly badges.
+- **Theme Customization**: Global Light/Dark mode toggle (Sun/Moon) available in both public and dashboard headers.
 
 Integrate Ethiopian payment systems **Telebirr** and **Chapa** for online payments.
 
