@@ -36,6 +36,8 @@ import {
   SelectTrigger, 
   SelectValue 
 } from "@/components/ui/select"
+import { useToast } from "@/hooks/use-toast"
+import { format } from "date-fns"
 
 const staffPerformanceData = [
   { name: 'Cleaning', completed: 45, averageTime: 25 },
@@ -55,7 +57,45 @@ const revenueByDepartment = [
 const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6']
 
 export default function ManagerReportsPage() {
+  const { toast } = useToast()
   const [reportType, setReportType] = useState("operational")
+  const [departmentFilter, setDepartmentFilter] = useState("all")
+  const [dateRange, setDateRange] = useState("30days")
+
+  const exportReport = () => {
+    const headers = ["Department", "Tasks Completed", "Avg Time (min)", "Revenue (ETB)"]
+    const rows = staffPerformanceData.map((dept, i) => [
+      dept.name,
+      dept.completed,
+      dept.averageTime,
+      revenueByDepartment[i]?.value || 0
+    ])
+
+    const csvContent = [
+      `Report Type: ${reportType}`,
+      `Date Range: ${dateRange}`,
+      `Department Filter: ${departmentFilter}`,
+      `Generated: ${format(new Date(), "yyyy-MM-dd HH:mm:ss")}`,
+      "",
+      headers.join(","),
+      ...rows.map(row => row.join(","))
+    ].join("\n")
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" })
+    const link = document.createElement("a")
+    const url = URL.createObjectURL(blob)
+    link.setAttribute("href", url)
+    link.setAttribute("download", `report_${format(new Date(), "yyyy-MM-dd")}.csv`)
+    link.style.visibility = "hidden"
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+
+    toast({
+      title: "Report Exported",
+      description: "Report has been exported to CSV successfully.",
+    })
+  }
 
   return (
     <DashboardLayout requiredRoles={["manager"]} title="Operational Analytics">
@@ -67,7 +107,19 @@ export default function ManagerReportsPage() {
             <span className="text-sm font-medium">Last 30 Days: March 1 - March 31, 2024</span>
           </div>
           <div className="flex items-center gap-2 w-full sm:w-auto">
-            <Select defaultValue="all">
+            <Select value={dateRange} onValueChange={setDateRange}>
+              <SelectTrigger className="w-[150px]">
+                <Calendar className="h-4 w-4 mr-2" />
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="7days">Last 7 Days</SelectItem>
+                <SelectItem value="30days">Last 30 Days</SelectItem>
+                <SelectItem value="90days">Last 90 Days</SelectItem>
+                <SelectItem value="year">This Year</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={departmentFilter} onValueChange={setDepartmentFilter}>
               <SelectTrigger className="w-[150px]">
                 <Filter className="h-4 w-4 mr-2" />
                 <SelectValue placeholder="Department" />
@@ -79,7 +131,7 @@ export default function ManagerReportsPage() {
                 <SelectItem value="reception">Reception</SelectItem>
               </SelectContent>
             </Select>
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" onClick={exportReport}>
               <Download className="h-4 w-4 mr-2" /> Export
             </Button>
           </div>

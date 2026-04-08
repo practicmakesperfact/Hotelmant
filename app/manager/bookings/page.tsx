@@ -30,8 +30,10 @@ import {
 } from "lucide-react"
 import { mockBookings, mockRooms, getOccupancyStats } from "@/lib/mock-data"
 import { format } from "date-fns"
+import { useToast } from "@/hooks/use-toast"
 
 export default function ManagerBookingsPage() {
+  const { toast } = useToast()
   const occupancyData = getOccupancyStats()
   
   const totalRooms = mockRooms.length
@@ -43,6 +45,44 @@ export default function ManagerBookingsPage() {
     { label: "Avg. Daily Rate", value: "ETB 4,500", trend: "up", percentage: "+5%", icon: TrendingUp },
     { label: "Total Revenue (Mo)", value: `ETB ${(mockBookings.reduce((sum, b) => sum + b.totalAmount, 0) / 1000).toFixed(0)}K`, trend: "up", percentage: "+8%", icon: Users },
   ]
+
+  const exportToCSV = () => {
+    const headers = ["Booking ID", "Guest Name", "Email", "Phone", "Room", "Check-In", "Check-Out", "Nights", "Guests", "Amount", "Status", "Payment"]
+    const rows = mockBookings.map(booking => [
+      booking.bookingNumber,
+      booking.customerName,
+      booking.customerEmail,
+      booking.customerPhone,
+      `${booking.roomNumber} (${booking.roomType})`,
+      format(new Date(booking.checkInDate), "yyyy-MM-dd"),
+      format(new Date(booking.checkOutDate), "yyyy-MM-dd"),
+      booking.numberOfNights,
+      booking.numberOfGuests,
+      booking.totalAmount,
+      booking.status,
+      booking.paymentStatus
+    ])
+
+    const csvContent = [
+      headers.join(","),
+      ...rows.map(row => row.map(cell => `"${cell}"`).join(","))
+    ].join("\n")
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" })
+    const link = document.createElement("a")
+    const url = URL.createObjectURL(blob)
+    link.setAttribute("href", url)
+    link.setAttribute("download", `bookings_${format(new Date(), "yyyy-MM-dd")}.csv`)
+    link.style.visibility = "hidden"
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+
+    toast({
+      title: "Export Successful",
+      description: "Bookings data has been exported to CSV.",
+    })
+  }
 
   return (
     <DashboardLayout requiredRoles={["manager"]} title="Bookings & Occupancy">
@@ -80,7 +120,7 @@ export default function ManagerBookingsPage() {
               <CardTitle>Occupancy Trends</CardTitle>
               <CardDescription>Daily occupancy percentage for the current month</CardDescription>
             </div>
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" onClick={exportToCSV}>
               <Download className="mr-2 h-4 w-4" /> Export CSV
             </Button>
           </CardHeader>

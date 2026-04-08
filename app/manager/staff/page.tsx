@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import { 
   Table, 
   TableBody, 
@@ -14,6 +15,15 @@ import {
   TableHeader, 
   TableRow 
 } from "@/components/ui/table"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -43,12 +53,26 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { mockStaff } from "@/lib/mock-data"
+import { useToast } from "@/hooks/use-toast"
 
 export default function ManagerStaffPage() {
+  const { toast } = useToast()
+  const [staff, setStaff] = useState(mockStaff)
   const [searchTerm, setSearchTerm] = useState("")
   const [deptFilter, setDeptFilter] = useState("all")
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
 
-  const filteredStaff = mockStaff.filter(staff => {
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    department: "Front Desk",
+    role: "receptionist",
+    shift: "morning",
+  })
+
+  const filteredStaff = staff.filter(staff => {
     const searchLower = searchTerm.toLowerCase()
     const matchesSearch = 
       `${staff.firstName} ${staff.lastName}`.toLowerCase().includes(searchLower) ||
@@ -57,7 +81,46 @@ export default function ManagerStaffPage() {
     return matchesSearch && matchesDept
   })
 
-  const departments = Array.from(new Set(mockStaff.map(s => s.department)))
+  const departments = Array.from(new Set(staff.map(s => s.department)))
+
+  const resetForm = () => {
+    setFormData({
+      firstName: "",
+      lastName: "",
+      email: "",
+      phone: "",
+      department: "Front Desk",
+      role: "receptionist",
+      shift: "morning",
+    })
+  }
+
+  const handleAddStaff = () => {
+    const newStaff = {
+      id: `staff-${Date.now()}`,
+      email: formData.email,
+      password: '$2b$10$hashedpassword',
+      firstName: formData.firstName,
+      lastName: formData.lastName,
+      role: formData.role as any,
+      phone: formData.phone,
+      department: formData.department,
+      shift: formData.shift as any,
+      hireDate: new Date(),
+      employeeId: `EMP${String(staff.length + 1).padStart(3, '0')}`,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      isActive: true,
+    }
+
+    setStaff([...staff, newStaff])
+    setIsAddDialogOpen(false)
+    resetForm()
+    toast({
+      title: "Staff Added",
+      description: `${formData.firstName} ${formData.lastName} has been added successfully.`,
+    })
+  }
 
   return (
     <DashboardLayout requiredRoles={["manager"]} title="Team Management">
@@ -72,7 +135,7 @@ export default function ManagerStaffPage() {
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Total Staff</p>
-                  <p className="text-2xl font-bold">{mockStaff.length}</p>
+                  <p className="text-2xl font-bold">{staff.length}</p>
                 </div>
               </div>
             </CardContent>
@@ -85,7 +148,7 @@ export default function ManagerStaffPage() {
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">On Duty</p>
-                  <p className="text-2xl font-bold">{mockStaff.filter(s => s.isActive).length}</p>
+                  <p className="text-2xl font-bold">{staff.filter(s => s.isActive).length}</p>
                 </div>
               </div>
             </CardContent>
@@ -126,9 +189,108 @@ export default function ManagerStaffPage() {
                 <CardTitle>Designated Hotel Team</CardTitle>
                 <CardDescription>Monitor performance and schedule for your assigned staff members</CardDescription>
               </div>
-              <Button>
-                <UserPlus className="mr-2 h-4 w-4" /> Add Staff Member
-              </Button>
+              <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button onClick={resetForm}>
+                    <UserPlus className="mr-2 h-4 w-4" /> Add Staff Member
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-lg">
+                  <DialogHeader>
+                    <DialogTitle>Add New Staff Member</DialogTitle>
+                    <DialogDescription>Add a new team member to the hotel staff</DialogDescription>
+                  </DialogHeader>
+                  <div className="space-y-4 py-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="firstName">First Name *</Label>
+                        <Input 
+                          id="firstName" 
+                          placeholder="John" 
+                          value={formData.firstName}
+                          onChange={(e) => setFormData({...formData, firstName: e.target.value})}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="lastName">Last Name *</Label>
+                        <Input 
+                          id="lastName" 
+                          placeholder="Doe" 
+                          value={formData.lastName}
+                          onChange={(e) => setFormData({...formData, lastName: e.target.value})}
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="email">Email *</Label>
+                      <Input 
+                        id="email" 
+                        type="email" 
+                        placeholder="john.doe@hotel.com" 
+                        value={formData.email}
+                        onChange={(e) => setFormData({...formData, email: e.target.value})}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="phone">Phone *</Label>
+                      <Input 
+                        id="phone" 
+                        placeholder="+251911223344" 
+                        value={formData.phone}
+                        onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="department">Department *</Label>
+                        <Select value={formData.department} onValueChange={(value) => setFormData({...formData, department: value})}>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Front Desk">Front Desk</SelectItem>
+                            <SelectItem value="Housekeeping">Housekeeping</SelectItem>
+                            <SelectItem value="Management">Management</SelectItem>
+                            <SelectItem value="Inventory">Inventory</SelectItem>
+                            <SelectItem value="Administration">Administration</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="role">Role *</Label>
+                        <Select value={formData.role} onValueChange={(value) => setFormData({...formData, role: value})}>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="receptionist">Receptionist</SelectItem>
+                            <SelectItem value="housekeeping">Housekeeping</SelectItem>
+                            <SelectItem value="manager">Manager</SelectItem>
+                            <SelectItem value="inventory_manager">Inventory Manager</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="shift">Shift *</Label>
+                      <Select value={formData.shift} onValueChange={(value) => setFormData({...formData, shift: value})}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="morning">Morning</SelectItem>
+                          <SelectItem value="afternoon">Afternoon</SelectItem>
+                          <SelectItem value="night">Night</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  <DialogFooter>
+                    <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>Cancel</Button>
+                    <Button onClick={handleAddStaff}>Add Staff</Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
             </div>
           </CardHeader>
           <CardContent>
