@@ -1,18 +1,19 @@
-import { useState, useEffect } from 'react';
-import { mockBookings, mockRooms } from '../mock-data';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { mockBookings } from '../mock-data';
 import type { Booking, BookingStatus } from '../types';
 
 export function useBookings() {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [isInitialized, setIsInitialized] = useState(false);
+  // Track whether we should persist — only persist after user-initiated changes
+  const shouldPersistRef = useRef(false);
 
   useEffect(() => {
-    // Load from localStorage or initialize with mock data
+    // Load from localStorage or initialize with mock data (runs once on mount)
     const stored = localStorage.getItem('hotel_bookings');
     if (stored) {
       try {
         const parsed = JSON.parse(stored);
-        // Convert string dates back to Date objects
         const withDates = parsed.map((b: any) => ({
           ...b,
           checkInDate: new Date(b.checkInDate),
@@ -24,7 +25,7 @@ export function useBookings() {
         }));
         setBookings(withDates);
       } catch (e) {
-        console.error("Failed to parse bookings from localStorage", e);
+        console.error('Failed to parse bookings from localStorage', e);
         setBookings(mockBookings);
       }
     } else {
@@ -34,35 +35,39 @@ export function useBookings() {
     setIsInitialized(true);
   }, []);
 
-  // Save to localeStorage whenever bookings change (but only after initialization)
+  // Only persist when a mutation has been explicitly made (not on the initial load)
   useEffect(() => {
-    if (isInitialized) {
+    if (isInitialized && shouldPersistRef.current) {
       localStorage.setItem('hotel_bookings', JSON.stringify(bookings));
+      shouldPersistRef.current = false;
     }
   }, [bookings, isInitialized]);
 
-  const addBooking = (newBooking: Booking) => {
+  const addBooking = useCallback((newBooking: Booking) => {
+    shouldPersistRef.current = true;
     setBookings(prev => [newBooking, ...prev]);
-  };
+  }, []);
 
-  const updateBookingStatus = (id: string, status: BookingStatus) => {
-    setBookings(prev => 
-      prev.map(booking => 
-        booking.id === id 
-          ? { ...booking, status, updatedAt: new Date() } 
+  const updateBookingStatus = useCallback((id: string, status: BookingStatus) => {
+    shouldPersistRef.current = true;
+    setBookings(prev =>
+      prev.map(booking =>
+        booking.id === id
+          ? { ...booking, status, updatedAt: new Date() }
           : booking
       )
     );
-  };
+  }, []);
 
-  const cancelBooking = (id: string) => {
+  const cancelBooking = useCallback((id: string) => {
     updateBookingStatus(id, 'cancelled');
-  };
-  
-  const getCustomerBookings = (email: string) => {
-    return bookings.filter(b => b.customerEmail.toLowerCase() === email.toLowerCase())
-      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()); // newest first
-  };
+  }, [updateBookingStatus]);
+
+  const getCustomerBookings = useCallback((email: string) => {
+    return bookings
+      .filter(b => b.customerEmail.toLowerCase() === email.toLowerCase())
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  }, [bookings]);
 
   return {
     bookings,
@@ -70,6 +75,7 @@ export function useBookings() {
     addBooking,
     updateBookingStatus,
     cancelBooking,
-    getCustomerBookings
+    getCustomerBookings,
   };
 }
+

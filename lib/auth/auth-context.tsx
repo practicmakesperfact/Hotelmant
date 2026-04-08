@@ -1,6 +1,7 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState, useCallback, type ReactNode } from 'react';
+import { useRouter } from 'next/navigation';
 import type { User, UserRole } from '@/lib/types';
 import { login as authLogin, verifyToken, getDashboardRoute, hasPermission } from './index';
 import { getUserById } from '@/lib/mock-data';
@@ -109,6 +110,18 @@ export function withAuth<P extends object>(
 ) {
   return function ProtectedRoute(props: P) {
     const { user, isLoading, isAuthenticated } = useAuth();
+    const router = useRouter();
+
+    useEffect(() => {
+      if (isLoading) return;
+      if (!isAuthenticated) {
+        router.push('/login');
+        return;
+      }
+      if (allowedRoles && user && !allowedRoles.includes(user.role)) {
+        router.push(getDashboardRoute(user.role));
+      }
+    }, [isLoading, isAuthenticated, user, router]);
 
     if (isLoading) {
       return (
@@ -119,16 +132,10 @@ export function withAuth<P extends object>(
     }
 
     if (!isAuthenticated) {
-      if (typeof window !== 'undefined') {
-        window.location.href = '/login';
-      }
       return null;
     }
 
     if (allowedRoles && user && !allowedRoles.includes(user.role)) {
-      if (typeof window !== 'undefined') {
-        window.location.href = getDashboardRoute(user.role);
-      }
       return null;
     }
 

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/lib/auth/auth-context"
 import { DashboardSidebar } from "./dashboard-sidebar"
@@ -19,12 +19,18 @@ export function DashboardLayout({ children, requiredRoles, title }: DashboardLay
   const router = useRouter()
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false)
+  // Use ref so we don't trigger the effect when requiredRoles array ref changes
+  const requiredRolesRef = useRef(requiredRoles)
+  requiredRolesRef.current = requiredRoles
 
   useEffect(() => {
-    if (!isLoading && !user) {
+    if (isLoading) return
+    if (!user) {
       router.push("/login")
-    } else if (!isLoading && user && requiredRoles && !requiredRoles.includes(user.role)) {
-      // Redirect to appropriate dashboard based on role
+      return
+    }
+    const roles = requiredRolesRef.current
+    if (roles && !roles.includes(user.role)) {
       const roleRoutes: Record<UserRole, string> = {
         admin: "/admin",
         manager: "/manager",
@@ -35,7 +41,8 @@ export function DashboardLayout({ children, requiredRoles, title }: DashboardLay
       }
       router.push(roleRoutes[user.role])
     }
-  }, [user, isLoading, router, requiredRoles])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, isLoading])
 
   if (isLoading) {
     return (

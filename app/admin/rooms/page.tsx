@@ -22,7 +22,18 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
 import { 
   Search, 
   Plus, 
@@ -32,7 +43,7 @@ import {
   DollarSign,
   Edit,
   Eye,
-  Settings2,
+  Trash2,
   CheckCircle,
   XCircle,
   Paintbrush,
@@ -41,20 +52,42 @@ import {
 import { mockRooms } from "@/lib/mock-data"
 import { RoomStatus, RoomType } from "@/lib/types"
 import Link from "next/link"
+import { useToast } from "@/hooks/use-toast"
 
 export default function AdminRoomsPage() {
+  const { toast } = useToast()
+  const [rooms, setRooms] = useState(mockRooms)
   const [searchTerm, setSearchTerm] = useState("")
   const [statusFilter, setStatusFilter] = useState<string>("all")
   const [typeFilter, setTypeFilter] = useState<string>("all")
+  const [floorFilter, setFloorFilter] = useState<string>("all")
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+  const [selectedRoom, setSelectedRoom] = useState<any>(null)
 
-  const filteredRooms = mockRooms.filter(room => {
+  // Form state
+  const [formData, setFormData] = useState({
+    roomNumber: "",
+    floor: "",
+    type: "standard" as RoomType,
+    bedType: "double",
+    capacity: "2",
+    pricePerNight: "",
+    size: "",
+    description: "",
+    status: "available" as RoomStatus,
+  })
+
+  const filteredRooms = rooms.filter(room => {
+    const roomName = room.type || ""
     const matchesSearch = 
       room.roomNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      room.name.toLowerCase().includes(searchTerm.toLowerCase())
+      roomName.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesStatus = statusFilter === "all" || room.status === statusFilter
     const matchesType = typeFilter === "all" || room.type === typeFilter
-    return matchesSearch && matchesStatus && matchesType
+    const matchesFloor = floorFilter === "all" || room.floor.toString() === floorFilter
+    return matchesSearch && matchesStatus && matchesType && matchesFloor
   })
 
   const statusConfig: Record<RoomStatus, { color: string, icon: React.ElementType }> = {
@@ -66,11 +99,124 @@ export default function AdminRoomsPage() {
   }
 
   const stats = [
-    { label: "Total Rooms", value: mockRooms.length, icon: Hotel, color: "text-primary" },
-    { label: "Available", value: mockRooms.filter(r => r.status === "available").length, icon: CheckCircle, color: "text-accent" },
-    { label: "Occupied", value: mockRooms.filter(r => r.status === "occupied").length, icon: Users, color: "text-chart-1" },
-    { label: "Maintenance", value: mockRooms.filter(r => r.status === "maintenance").length, icon: Wrench, color: "text-destructive" }
+    { label: "Total Rooms", value: rooms.length, icon: Hotel, color: "text-primary" },
+    { label: "Available", value: rooms.filter(r => r.status === "available").length, icon: CheckCircle, color: "text-accent" },
+    { label: "Occupied", value: rooms.filter(r => r.status === "occupied").length, icon: Users, color: "text-chart-1" },
+    { label: "Maintenance", value: rooms.filter(r => r.status === "maintenance").length, icon: Wrench, color: "text-destructive" }
   ]
+
+  const floors = Array.from(new Set(rooms.map(r => r.floor))).sort((a, b) => a - b)
+
+  const resetForm = () => {
+    setFormData({
+      roomNumber: "",
+      floor: "",
+      type: "standard",
+      bedType: "double",
+      capacity: "2",
+      pricePerNight: "",
+      size: "",
+      description: "",
+      status: "available",
+    })
+  }
+
+  const handleAddRoom = () => {
+    const newRoom = {
+      id: `room-${Date.now()}`,
+      roomNumber: formData.roomNumber,
+      type: formData.type,
+      floor: parseInt(formData.floor),
+      bedType: formData.bedType as any,
+      maxOccupancy: parseInt(formData.capacity),
+      pricePerNight: parseFloat(formData.pricePerNight),
+      status: formData.status,
+      amenities: ['WiFi', 'TV', 'Air Conditioning'],
+      description: formData.description || `${formData.type} room with modern amenities`,
+      descriptionAm: formData.description || `${formData.type} room with modern amenities`,
+      descriptionOm: formData.description || `${formData.type} room with modern amenities`,
+      images: [],
+      size: parseInt(formData.size),
+      view: 'city' as any,
+      isSmokingAllowed: false,
+      hasBalcony: false,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    }
+
+    setRooms([...rooms, newRoom])
+    setIsAddDialogOpen(false)
+    resetForm()
+    toast({
+      title: "Room Added",
+      description: `Room ${formData.roomNumber} has been added successfully.`,
+    })
+  }
+
+  const handleEditRoom = () => {
+    if (!selectedRoom) return
+
+    const updatedRooms = rooms.map(room => 
+      room.id === selectedRoom.id 
+        ? {
+            ...room,
+            roomNumber: formData.roomNumber,
+            type: formData.type,
+            floor: parseInt(formData.floor),
+            bedType: formData.bedType as any,
+            maxOccupancy: parseInt(formData.capacity),
+            pricePerNight: parseFloat(formData.pricePerNight),
+            status: formData.status,
+            size: parseInt(formData.size),
+            description: formData.description,
+            updatedAt: new Date(),
+          }
+        : room
+    )
+
+    setRooms(updatedRooms)
+    setIsEditDialogOpen(false)
+    setSelectedRoom(null)
+    resetForm()
+    toast({
+      title: "Room Updated",
+      description: `Room ${formData.roomNumber} has been updated successfully.`,
+    })
+  }
+
+  const handleDeleteRoom = () => {
+    if (!selectedRoom) return
+
+    setRooms(rooms.filter(room => room.id !== selectedRoom.id))
+    setIsDeleteDialogOpen(false)
+    toast({
+      title: "Room Deleted",
+      description: `Room ${selectedRoom.roomNumber} has been deleted.`,
+      variant: "destructive",
+    })
+    setSelectedRoom(null)
+  }
+
+  const openEditDialog = (room: any) => {
+    setSelectedRoom(room)
+    setFormData({
+      roomNumber: room.roomNumber,
+      floor: room.floor.toString(),
+      type: room.type,
+      bedType: room.bedType,
+      capacity: room.maxOccupancy.toString(),
+      pricePerNight: room.pricePerNight.toString(),
+      size: room.size.toString(),
+      description: room.description,
+      status: room.status,
+    })
+    setIsEditDialogOpen(true)
+  }
+
+  const openDeleteDialog = (room: any) => {
+    setSelectedRoom(room)
+    setIsDeleteDialogOpen(true)
+  }
 
   return (
     <DashboardLayout requiredRoles={["admin"]} title="Room Management">
@@ -105,11 +251,11 @@ export default function AdminRoomsPage() {
               </div>
               <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
                 <DialogTrigger asChild>
-                  <Button>
+                  <Button onClick={resetForm}>
                     <Plus className="mr-2 h-4 w-4" /> Add Room
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="max-w-lg">
+                <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
                   <DialogHeader>
                     <DialogTitle>Add New Room</DialogTitle>
                     <DialogDescription>Create a new room in the system</DialogDescription>
@@ -117,22 +263,29 @@ export default function AdminRoomsPage() {
                   <div className="space-y-4 py-4">
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label htmlFor="roomNumber">Room Number</Label>
-                        <Input id="roomNumber" placeholder="101" />
+                        <Label htmlFor="roomNumber">Room Number *</Label>
+                        <Input 
+                          id="roomNumber" 
+                          placeholder="101" 
+                          value={formData.roomNumber}
+                          onChange={(e) => setFormData({...formData, roomNumber: e.target.value})}
+                        />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="floor">Floor</Label>
-                        <Input id="floor" type="number" placeholder="1" />
+                        <Label htmlFor="floor">Floor *</Label>
+                        <Input 
+                          id="floor" 
+                          type="number" 
+                          placeholder="1" 
+                          value={formData.floor}
+                          onChange={(e) => setFormData({...formData, floor: e.target.value})}
+                        />
                       </div>
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="name">Room Name</Label>
-                      <Input id="name" placeholder="Deluxe Suite" />
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label htmlFor="type">Room Type</Label>
-                        <Select>
+                        <Label htmlFor="type">Room Type *</Label>
+                        <Select value={formData.type} onValueChange={(value) => setFormData({...formData, type: value as RoomType})}>
                           <SelectTrigger>
                             <SelectValue placeholder="Select type" />
                           </SelectTrigger>
@@ -141,28 +294,88 @@ export default function AdminRoomsPage() {
                             <SelectItem value="deluxe">Deluxe</SelectItem>
                             <SelectItem value="suite">Suite</SelectItem>
                             <SelectItem value="presidential">Presidential</SelectItem>
+                            <SelectItem value="family">Family</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="capacity">Capacity</Label>
-                        <Input id="capacity" type="number" placeholder="2" />
+                        <Label htmlFor="bedType">Bed Type *</Label>
+                        <Select value={formData.bedType} onValueChange={(value) => setFormData({...formData, bedType: value})}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select bed" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="single">Single</SelectItem>
+                            <SelectItem value="double">Double</SelectItem>
+                            <SelectItem value="twin">Twin</SelectItem>
+                            <SelectItem value="queen">Queen</SelectItem>
+                            <SelectItem value="king">King</SelectItem>
+                          </SelectContent>
+                        </Select>
                       </div>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label htmlFor="price">Price per Night (ETB)</Label>
-                        <Input id="price" type="number" placeholder="5000" />
+                        <Label htmlFor="capacity">Capacity *</Label>
+                        <Input 
+                          id="capacity" 
+                          type="number" 
+                          placeholder="2" 
+                          value={formData.capacity}
+                          onChange={(e) => setFormData({...formData, capacity: e.target.value})}
+                        />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="size">Size (sqm)</Label>
-                        <Input id="size" type="number" placeholder="35" />
+                        <Label htmlFor="size">Size (sqm) *</Label>
+                        <Input 
+                          id="size" 
+                          type="number" 
+                          placeholder="35" 
+                          value={formData.size}
+                          onChange={(e) => setFormData({...formData, size: e.target.value})}
+                        />
                       </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="price">Price per Night (ETB) *</Label>
+                        <Input 
+                          id="price" 
+                          type="number" 
+                          placeholder="5000" 
+                          value={formData.pricePerNight}
+                          onChange={(e) => setFormData({...formData, pricePerNight: e.target.value})}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="status">Status *</Label>
+                        <Select value={formData.status} onValueChange={(value) => setFormData({...formData, status: value as RoomStatus})}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select status" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="available">Available</SelectItem>
+                            <SelectItem value="occupied">Occupied</SelectItem>
+                            <SelectItem value="cleaning">Cleaning</SelectItem>
+                            <SelectItem value="maintenance">Maintenance</SelectItem>
+                            <SelectItem value="reserved">Reserved</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="description">Description</Label>
+                      <Textarea 
+                        id="description" 
+                        placeholder="Room description..." 
+                        value={formData.description}
+                        onChange={(e) => setFormData({...formData, description: e.target.value})}
+                      />
                     </div>
                   </div>
                   <DialogFooter>
                     <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>Cancel</Button>
-                    <Button onClick={() => setIsAddDialogOpen(false)}>Create Room</Button>
+                    <Button onClick={handleAddRoom}>Create Room</Button>
                   </DialogFooter>
                 </DialogContent>
               </Dialog>
@@ -180,6 +393,17 @@ export default function AdminRoomsPage() {
                   className="pl-9"
                 />
               </div>
+              <Select value={floorFilter} onValueChange={setFloorFilter}>
+                <SelectTrigger className="w-full sm:w-[130px]">
+                  <SelectValue placeholder="Floor" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Floors</SelectItem>
+                  {floors.map(floor => (
+                    <SelectItem key={floor} value={floor.toString()}>Floor {floor}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <Select value={statusFilter} onValueChange={setStatusFilter}>
                 <SelectTrigger className="w-full sm:w-[150px]">
                   <SelectValue placeholder="Status" />
@@ -203,6 +427,7 @@ export default function AdminRoomsPage() {
                   <SelectItem value="deluxe">Deluxe</SelectItem>
                   <SelectItem value="suite">Suite</SelectItem>
                   <SelectItem value="presidential">Presidential</SelectItem>
+                  <SelectItem value="family">Family</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -216,7 +441,7 @@ export default function AdminRoomsPage() {
                     <div className="aspect-video bg-muted relative">
                       <img 
                         src={room.images[0] || `https://images.unsplash.com/photo-1618773928121-c32242e63f39?q=80&w=500&auto=format&fit=crop`} 
-                        alt={room.name}
+                        alt={room.type}
                         className="w-full h-full object-cover transition-transform hover:scale-105"
                         onError={(e) => {
                           const target = e.target as HTMLImageElement;
@@ -231,19 +456,19 @@ export default function AdminRoomsPage() {
                     <CardContent className="p-4">
                       <div className="flex items-start justify-between mb-2">
                         <div>
-                          <h3 className="font-semibold">{room.name}</h3>
+                          <h3 className="font-semibold capitalize">{room.type} Room</h3>
                           <p className="text-sm text-muted-foreground">Room {room.roomNumber} • Floor {room.floor}</p>
                         </div>
-                        <Badge variant="outline">{room.type}</Badge>
+                        <Badge variant="outline" className="capitalize">{room.type}</Badge>
                       </div>
                       <div className="flex items-center gap-4 text-sm text-muted-foreground mb-4">
                         <div className="flex items-center gap-1">
                           <Users className="h-4 w-4" />
-                          <span>{room.capacity}</span>
+                          <span>{room.maxOccupancy}</span>
                         </div>
                         <div className="flex items-center gap-1">
                           <Bed className="h-4 w-4" />
-                          <span>{room.bedType}</span>
+                          <span className="capitalize">{room.bedType}</span>
                         </div>
                         <div className="flex items-center gap-1">
                           <DollarSign className="h-4 w-4" />
@@ -256,11 +481,11 @@ export default function AdminRoomsPage() {
                             <Eye className="h-4 w-4 mr-1" /> View
                           </Link>
                         </Button>
-                        <Button variant="outline" size="sm" className="flex-1">
+                        <Button variant="outline" size="sm" className="flex-1" onClick={() => openEditDialog(room)}>
                           <Edit className="h-4 w-4 mr-1" /> Edit
                         </Button>
-                        <Button variant="outline" size="icon" className="shrink-0">
-                          <Settings2 className="h-4 w-4" />
+                        <Button variant="outline" size="icon" className="shrink-0" onClick={() => openDeleteDialog(room)}>
+                          <Trash2 className="h-4 w-4 text-destructive" />
                         </Button>
                       </div>
                     </CardContent>
@@ -278,6 +503,145 @@ export default function AdminRoomsPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Edit Dialog */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Edit Room</DialogTitle>
+            <DialogDescription>Update room information</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="edit-roomNumber">Room Number *</Label>
+                <Input 
+                  id="edit-roomNumber" 
+                  value={formData.roomNumber}
+                  onChange={(e) => setFormData({...formData, roomNumber: e.target.value})}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-floor">Floor *</Label>
+                <Input 
+                  id="edit-floor" 
+                  type="number" 
+                  value={formData.floor}
+                  onChange={(e) => setFormData({...formData, floor: e.target.value})}
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="edit-type">Room Type *</Label>
+                <Select value={formData.type} onValueChange={(value) => setFormData({...formData, type: value as RoomType})}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="standard">Standard</SelectItem>
+                    <SelectItem value="deluxe">Deluxe</SelectItem>
+                    <SelectItem value="suite">Suite</SelectItem>
+                    <SelectItem value="presidential">Presidential</SelectItem>
+                    <SelectItem value="family">Family</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-bedType">Bed Type *</Label>
+                <Select value={formData.bedType} onValueChange={(value) => setFormData({...formData, bedType: value})}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="single">Single</SelectItem>
+                    <SelectItem value="double">Double</SelectItem>
+                    <SelectItem value="twin">Twin</SelectItem>
+                    <SelectItem value="queen">Queen</SelectItem>
+                    <SelectItem value="king">King</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="edit-capacity">Capacity *</Label>
+                <Input 
+                  id="edit-capacity" 
+                  type="number" 
+                  value={formData.capacity}
+                  onChange={(e) => setFormData({...formData, capacity: e.target.value})}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-size">Size (sqm) *</Label>
+                <Input 
+                  id="edit-size" 
+                  type="number" 
+                  value={formData.size}
+                  onChange={(e) => setFormData({...formData, size: e.target.value})}
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="edit-price">Price per Night (ETB) *</Label>
+                <Input 
+                  id="edit-price" 
+                  type="number" 
+                  value={formData.pricePerNight}
+                  onChange={(e) => setFormData({...formData, pricePerNight: e.target.value})}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-status">Status *</Label>
+                <Select value={formData.status} onValueChange={(value) => setFormData({...formData, status: value as RoomStatus})}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="available">Available</SelectItem>
+                    <SelectItem value="occupied">Occupied</SelectItem>
+                    <SelectItem value="cleaning">Cleaning</SelectItem>
+                    <SelectItem value="maintenance">Maintenance</SelectItem>
+                    <SelectItem value="reserved">Reserved</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-description">Description</Label>
+              <Textarea 
+                id="edit-description" 
+                value={formData.description}
+                onChange={(e) => setFormData({...formData, description: e.target.value})}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>Cancel</Button>
+            <Button onClick={handleEditRoom}>Update Room</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete room {selectedRoom?.roomNumber}. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteRoom} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </DashboardLayout>
   )
 }

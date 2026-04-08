@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, useMemo, type ReactNode } from 'react';
 import type { Locale } from '@/lib/types';
 import { defaultLocale, isValidLocale, getTranslations, type TranslationKey } from './index';
 
@@ -32,7 +32,7 @@ export function LocaleProvider({ children, initialLocale }: { children: ReactNod
     setLocaleState(newLocale);
   }, []);
 
-  const t = getTranslations(locale);
+  const t = useMemo(() => getTranslations(locale), [locale]);
 
   const formatCurrency = useCallback((amount: number) => {
     const formatter = new Intl.NumberFormat(locale === 'am' ? 'am-ET' : locale === 'om' ? 'om-ET' : 'en-ET', {
