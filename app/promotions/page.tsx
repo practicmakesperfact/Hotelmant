@@ -16,15 +16,17 @@ import {
 import { mockPromotions } from "@/lib/mock-data"
 import { format, differenceInDays } from "date-fns"
 import { useToast } from "@/hooks/use-toast"
+import { useLocale } from "@/lib/i18n/locale-context"
 
 export default function PromotionsPage() {
+  const { t } = useLocale()
   const { toast } = useToast()
 
   const copyCode = (code: string) => {
     navigator.clipboard.writeText(code)
     toast({
-      title: "Code Copied!",
-      description: `Promo code "${code}" copied to clipboard`,
+      title: t.promotions.codeCopied,
+      description: `${code} ${t.promotions.copiedToClipboard}`,
     })
   }
 
@@ -38,9 +40,9 @@ export default function PromotionsPage() {
         <div className="container mx-auto px-4">
           {/* Header */}
           <div className="text-center max-w-3xl mx-auto mb-12">
-            <h1 className="text-4xl font-serif font-bold mb-4">Special Offers & Promotions</h1>
+            <h1 className="text-4xl font-serif font-bold mb-4">{t.promotions.title}</h1>
             <p className="text-muted-foreground text-lg">
-              Save more on your stay with our exclusive deals and discount codes
+              {t.promotions.subtitle}
             </p>
           </div>
 
@@ -63,7 +65,7 @@ export default function PromotionsPage() {
                       </Badge>
                       {daysRemaining <= 7 && (
                         <Badge variant="destructive" className="text-xs">
-                          <Clock className="h-3 w-3 mr-1" /> {daysRemaining} days left
+                          <Clock className="h-3 w-3 mr-1" /> {daysRemaining} {t.promotions.daysLeft}
                         </Badge>
                       )}
                     </div>
@@ -74,7 +76,7 @@ export default function PromotionsPage() {
                   <CardContent className="p-6">
                     {/* Promo Code */}
                     <div className="bg-secondary/50 rounded-lg p-4 mb-4 border-2 border-dashed">
-                      <p className="text-xs text-muted-foreground mb-2">Promo Code</p>
+                      <p className="text-xs text-muted-foreground mb-2">{t.promotions.promoCode}</p>
                       <div className="flex items-center justify-between">
                         <code className="text-lg font-bold tracking-wider">{promo.code}</code>
                         <Button 
@@ -92,23 +94,23 @@ export default function PromotionsPage() {
                       {promo.minBookingAmount && (
                         <div className="flex items-center gap-2 text-muted-foreground">
                           <DollarSign className="h-4 w-4" />
-                          <span>Min. booking: ETB {promo.minBookingAmount.toLocaleString()}</span>
+                          <span>{t.promotions.minBooking}: ETB {promo.minBookingAmount.toLocaleString()}</span>
                         </div>
                       )}
                       {promo.maxDiscount && (
                         <div className="flex items-center gap-2 text-muted-foreground">
                           <Tag className="h-4 w-4" />
-                          <span>Max. discount: ETB {promo.maxDiscount.toLocaleString()}</span>
+                          <span>{t.promotions.maxDiscount}: ETB {promo.maxDiscount.toLocaleString()}</span>
                         </div>
                       )}
                       <div className="flex items-center gap-2 text-muted-foreground">
                         <Calendar className="h-4 w-4" />
-                        <span>Valid until {format(new Date(promo.validTo), 'MMM dd, yyyy')}</span>
+                        <span>{t.promotions.validUntil} {format(new Date(promo.validTo), 'MMM dd, yyyy')}</span>
                       </div>
                       {promo.applicableRoomTypes && (
                         <div className="flex items-center gap-2 text-muted-foreground">
                           <CheckCircle2 className="h-4 w-4" />
-                          <span>Applicable to: {promo.applicableRoomTypes.map(t => t.charAt(0).toUpperCase() + t.slice(1)).join(', ')}</span>
+                          <span>{t.promotions.applicableTo}: {promo.applicableRoomTypes.map(t => t.charAt(0).toUpperCase() + t.slice(1)).join(', ')}</span>
                         </div>
                       )}
                     </div>
@@ -117,8 +119,8 @@ export default function PromotionsPage() {
                     {promo.usageLimit && (
                       <div className="mt-4 pt-4 border-t">
                         <div className="flex items-center justify-between text-xs text-muted-foreground mb-2">
-                          <span>{promo.usedCount} used</span>
-                          <span>{promo.usageLimit - promo.usedCount} remaining</span>
+                          <span>{promo.usedCount} {t.promotions.used}</span>
+                          <span>{promo.usageLimit - promo.usedCount} {t.promotions.remaining}</span>
                         </div>
                         <div className="h-2 bg-secondary rounded-full overflow-hidden">
                           <div 
@@ -133,7 +135,7 @@ export default function PromotionsPage() {
                   <CardFooter className="p-6 pt-0">
                     <Button className="w-full" asChild>
                       <a href="/rooms">
-                        Book Now
+                        {t.promotions.bookNow}
                       </a>
                     </Button>
                   </CardFooter>
@@ -145,7 +147,7 @@ export default function PromotionsPage() {
           {/* Terms */}
           <Card className="mt-12">
             <CardHeader>
-              <CardTitle>Terms & Conditions</CardTitle>
+              <CardTitle>{t.promotions.termsConditions}</CardTitle>
             </CardHeader>
             <CardContent className="prose prose-sm max-w-none">
               <ul className="space-y-2 text-sm text-muted-foreground">

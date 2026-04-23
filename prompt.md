@@ -46,7 +46,7 @@ Store: user, action, timestamp, IP
 Data encryption (sensitive fields)
 GDPR-style privacy controls
 🌍 Multi-Language (i18n)
-Support English and Amharic
+Support English and Amharic, afaan oromoo
 Language switcher
 Store user preference
 Dynamic translation system

@@ -30,8 +30,10 @@ import {
 } from "lucide-react"
 import { mockConferenceHalls } from "@/lib/mock-data"
 import { useToast } from "@/hooks/use-toast"
+import { useLocale } from "@/lib/i18n/locale-context"
 
 export default function EventsPage() {
+  const { t } = useLocale()
   const { toast } = useToast()
   const [selectedHall, setSelectedHall] = useState<typeof mockConferenceHalls[0] | null>(null)
   const [showInquiry, setShowInquiry] = useState(false)
@@ -48,8 +50,8 @@ export default function EventsPage() {
 
   const handleInquiry = () => {
     toast({
-      title: "Inquiry Submitted",
-      description: "Our events team will contact you within 24 hours.",
+      title: t.events.inquirySubmitted,
+      description: t.events.contactWithin24,
     })
     setShowInquiry(false)
     setFormData({
@@ -77,19 +79,19 @@ export default function EventsPage() {
         <div className="container mx-auto px-4">
           {/* Header */}
           <div className="text-center max-w-3xl mx-auto mb-12">
-            <h1 className="text-4xl font-serif font-bold mb-4">Events & Conferences</h1>
+            <h1 className="text-4xl font-serif font-bold mb-4">{t.events.title}</h1>
             <p className="text-muted-foreground text-lg">
-              Host your next event in our world-class conference facilities
+              {t.events.subtitle}
             </p>
           </div>
 
           {/* Features */}
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
             {[
-              { icon: Users, title: "Flexible Capacity", desc: "From 20 to 500 guests" },
-              { icon: Monitor, title: "Modern Tech", desc: "AV equipment included" },
-              { icon: Coffee, title: "Catering", desc: "Full F&B services" },
-              { icon: CheckCircle2, title: "Full Support", desc: "Dedicated event team" },
+              { icon: Users, title: t.events.flexibleCapacity, desc: t.events.from20to500 },
+              { icon: Monitor, title: t.events.modernTech, desc: t.events.avEquipment },
+              { icon: Coffee, title: t.events.catering, desc: t.events.fullFBServices },
+              { icon: CheckCircle2, title: t.events.fullSupport, desc: t.events.dedicatedTeam },
             ].map((feature, i) => (
               <Card key={i} className="text-center p-6">
                 <feature.icon className="h-10 w-10 mx-auto mb-3 text-primary" />
@@ -101,7 +103,7 @@ export default function EventsPage() {
 
           {/* Conference Halls */}
           <div className="space-y-8">
-            <h2 className="text-2xl font-serif font-bold text-center mb-8">Our Venues</h2>
+            <h2 className="text-2xl font-serif font-bold text-center mb-8">{t.events.ourVenues}</h2>
             
             {mockConferenceHalls.map((hall) => (
               <Card key={hall.id} className="overflow-hidden">
@@ -130,12 +132,12 @@ export default function EventsPage() {
                           </div>
                         </div>
                         <Badge variant={hall.isAvailable ? "secondary" : "outline"}>
-                          {hall.isAvailable ? "Available" : "Booked"}
+                          {hall.isAvailable ? t.events.available : t.events.booked}
                         </Badge>
                       </div>
 
                       <div className="mb-6">
-                        <h4 className="text-sm font-semibold mb-3">Amenities & Equipment</h4>
+                        <h4 className="text-sm font-semibold mb-3">{t.events.amenitiesEquipment}</h4>
                         <div className="grid grid-cols-2 gap-3">
                           {hall.amenities.map((amenity) => {
                             const Icon = amenityIcons[amenity] || CheckCircle2
@@ -150,14 +152,14 @@ export default function EventsPage() {
                       </div>
 
                       <div className="bg-secondary/30 rounded-lg p-4 mb-6">
-                        <h4 className="text-sm font-semibold mb-2">Pricing</h4>
+                        <h4 className="text-sm font-semibold mb-2">{t.events.pricing}</h4>
                         <div className="grid grid-cols-2 gap-4">
                           <div>
-                            <p className="text-xs text-muted-foreground">Per Hour</p>
+                            <p className="text-xs text-muted-foreground">{t.events.perHour}</p>
                             <p className="text-lg font-bold text-primary">ETB {hall.pricePerHour.toLocaleString()}</p>
                           </div>
                           <div>
-                            <p className="text-xs text-muted-foreground">Full Day</p>
+                            <p className="text-xs text-muted-foreground">{t.events.fullDay}</p>
                             <p className="text-lg font-bold text-primary">ETB {hall.pricePerDay.toLocaleString()}</p>
                           </div>
                         </div>
@@ -174,7 +176,7 @@ export default function EventsPage() {
                       disabled={!hall.isAvailable}
                     >
                       <Calendar className="h-4 w-4 mr-2" />
-                      Request Booking
+                      {t.events.requestBooking}
                     </Button>
                   </div>
                 </div>
@@ -185,8 +187,8 @@ export default function EventsPage() {
           {/* Event Types */}
           <Card className="mt-12">
             <CardHeader>
-              <CardTitle>Perfect For</CardTitle>
-              <CardDescription>We host a variety of events</CardDescription>
+              <CardTitle>{t.events.perfectFor}</CardTitle>
+              <CardDescription>{t.events.weHost}</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -215,15 +217,15 @@ export default function EventsPage() {
       <Dialog open={showInquiry} onOpenChange={setShowInquiry}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle>Event Inquiry</DialogTitle>
+            <DialogTitle>{t.events.eventInquiry}</DialogTitle>
             <DialogDescription>
-              {selectedHall?.name} - Tell us about your event
+              {selectedHall?.name} - {t.events.tellUsAbout}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="name">Your Name *</Label>
+                <Label htmlFor="name">{t.events.yourName} *</Label>
                 <Input 
                   id="name" 
                   placeholder="John Doe"
@@ -232,7 +234,7 @@ export default function EventsPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="phone">Phone *</Label>
+                <Label htmlFor="phone">{t.events.phone} *</Label>
                 <Input 
                   id="phone" 
                   placeholder="+251911223344"
@@ -242,7 +244,7 @@ export default function EventsPage() {
               </div>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="email">Email *</Label>
+              <Label htmlFor="email">{t.events.email} *</Label>
               <Input 
                 id="email" 
                 type="email"
@@ -253,7 +255,7 @@ export default function EventsPage() {
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="eventDate">Event Date *</Label>
+                <Label htmlFor="eventDate">{t.events.eventDate} *</Label>
                 <Input 
                   id="eventDate" 
                   type="date"
@@ -262,7 +264,7 @@ export default function EventsPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="guests">Number of Guests *</Label>
+                <Label htmlFor="guests">{t.events.numberOfGuests} *</Label>
                 <Input 
                   id="guests" 
                   type="number"
@@ -273,10 +275,10 @@ export default function EventsPage() {
               </div>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="requirements">Special Requirements</Label>
+              <Label htmlFor="requirements">{t.events.specialRequirements}</Label>
               <Textarea 
                 id="requirements" 
-                placeholder="Any special setup, catering, or equipment needs..."
+                placeholder={t.events.anySpecialSetup}
                 value={formData.requirements}
                 onChange={(e) => setFormData({...formData, requirements: e.target.value})}
                 rows={3}
@@ -284,8 +286,8 @@ export default function EventsPage() {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowInquiry(false)}>Cancel</Button>
-            <Button onClick={handleInquiry}>Submit Inquiry</Button>
+            <Button variant="outline" onClick={() => setShowInquiry(false)}>{t.common.cancel}</Button>
+            <Button onClick={handleInquiry}>{t.events.submitInquiry}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

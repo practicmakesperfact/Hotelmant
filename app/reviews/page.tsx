@@ -61,7 +61,7 @@ export default function ReviewsPage() {
             {/* Overall Rating */}
             <Card className="lg:col-span-1">
               <CardHeader>
-                <h3 className="font-semibold text-lg">Overall Rating</h3>
+                <h3 className="font-semibold text-lg">{t.reviews.overallRating}</h3>
               </CardHeader>
               <CardContent>
                 <div className="text-center mb-6">
@@ -74,7 +74,7 @@ export default function ReviewsPage() {
                       />
                     ))}
                   </div>
-                  <p className="text-sm text-muted-foreground">Based on {totalReviews} reviews</p>
+                  <p className="text-sm text-muted-foreground">{t.reviews.basedOn} {totalReviews} {t.reviews.reviewsCount}</p>
                 </div>
 
                 <div className="space-y-3">
@@ -95,14 +95,14 @@ export default function ReviewsPage() {
             {/* Category Ratings */}
             <Card className="lg:col-span-2">
               <CardHeader>
-                <h3 className="font-semibold text-lg">Rating Breakdown</h3>
+                <h3 className="font-semibold text-lg">{t.reviews.ratingBreakdown}</h3>
               </CardHeader>
               <CardContent>
                 <div className="grid sm:grid-cols-2 gap-6">
                   {Object.entries(categoryAverages).map(([category, avg]) => (
                     <div key={category}>
                       <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm font-medium capitalize">{category}</span>
+                        <span className="text-sm font-medium capitalize">{t.reviews[category as keyof typeof t.reviews] || category}</span>
                         <span className="text-sm font-bold">{avg.toFixed(1)}/5</span>
                       </div>
                       <Progress value={(avg / 5) * 100} className="h-2" />
@@ -121,7 +121,7 @@ export default function ReviewsPage() {
               onClick={() => setFilter('all')}
               className="rounded-full"
             >
-              All Reviews
+              {t.reviews.allReviews}
             </Button>
             {[5, 4, 3, 2, 1].map((rating) => (
               <Button
@@ -170,19 +170,19 @@ export default function ReviewsPage() {
                       {/* Category Scores */}
                       <div className="flex flex-wrap gap-3 mb-4">
                         <Badge variant="secondary" className="text-xs">
-                          Cleanliness: {review.cleanliness}/5
+                          {t.reviews.cleanliness}: {review.cleanliness}/5
                         </Badge>
                         <Badge variant="secondary" className="text-xs">
-                          Service: {review.service}/5
+                          {t.reviews.service}: {review.service}/5
                         </Badge>
                         <Badge variant="secondary" className="text-xs">
-                          Amenities: {review.amenities}/5
+                          {t.reviews.amenities}: {review.amenities}/5
                         </Badge>
                         <Badge variant="secondary" className="text-xs">
-                          Value: {review.value}/5
+                          {t.reviews.value}: {review.value}/5
                         </Badge>
                         <Badge variant="secondary" className="text-xs">
-                          Location: {review.location}/5
+                          {t.reviews.location}: {review.location}/5
                         </Badge>
                       </div>
 
@@ -191,7 +191,7 @@ export default function ReviewsPage() {
                         <div className="bg-secondary/50 rounded-lg p-4 border-l-4 border-primary">
                           <div className="flex items-center gap-2 mb-2">
                             <MessageSquare className="h-4 w-4 text-primary" />
-                            <span className="text-sm font-semibold">Response from Management</span>
+                            <span className="text-sm font-semibold">{t.reviews.responseFrom}</span>
                           </div>
                           <p className="text-sm text-muted-foreground">{review.response}</p>
                           {review.respondedAt && (
@@ -206,7 +206,7 @@ export default function ReviewsPage() {
                       <div className="flex items-center gap-4 mt-4 pt-4 border-t">
                         <Button variant="ghost" size="sm" className="text-muted-foreground">
                           <ThumbsUp className="h-4 w-4 mr-2" />
-                          Helpful
+                          {t.reviews.helpful}
                         </Button>
                       </div>
                     </div>
@@ -219,8 +219,8 @@ export default function ReviewsPage() {
           {filteredReviews.length === 0 && (
             <div className="text-center py-24 bg-background rounded-3xl border-2 border-dashed">
               <Star className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-20" />
-              <h3 className="text-xl font-medium mb-1">No reviews found</h3>
-              <p className="text-muted-foreground">Try adjusting your filter.</p>
+              <h3 className="text-xl font-medium mb-1">{t.reviews.noReviews}</h3>
+              <p className="text-muted-foreground">{t.reviews.adjustFilter}</p>
             </div>
           )}
         </div>

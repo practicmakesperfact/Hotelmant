@@ -51,6 +51,11 @@ export const am = {
     dashboard: 'ዳሽቦርድ',
     profile: 'መገለጫ',
     settings: 'ቅንብሮች',
+    restaurant: 'ምግብ ቤት',
+    events: 'ዝግጅቶች',
+    gallery: 'ማዕከለ-ስዕላት',
+    promotions: 'ማስተዋወቂያዎች',
+    reviews: 'ግምገማዎች',
   },
   
   auth: {

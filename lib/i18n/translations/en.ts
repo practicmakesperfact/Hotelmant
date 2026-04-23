@@ -51,6 +51,11 @@ export const en = {
     dashboard: 'Dashboard',
     profile: 'Profile',
     settings: 'Settings',
+    restaurant: 'Restaurant',
+    events: 'Events',
+    gallery: 'Gallery',
+    promotions: 'Promotions',
+    reviews: 'Reviews',
   },
   
   auth: {

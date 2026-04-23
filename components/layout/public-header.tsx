@@ -21,11 +21,11 @@ export function PublicHeader() {
   const navigation = [
     { name: t.nav.home, href: '/' },
     { name: t.nav.rooms, href: '/rooms' },
-    { name: t.restaurant?.title || 'Restaurant', href: '/restaurant' },
-    { name: 'Events', href: '/events' },
-    { name: 'Gallery', href: '/gallery' },
-    { name: 'Promotions', href: '/promotions' },
-    { name: 'Reviews', href: '/reviews' },
+    { name: t.nav.restaurant, href: '/restaurant' },
+    { name: t.nav.events, href: '/events' },
+    { name: t.nav.gallery, href: '/gallery' },
+    { name: t.nav.promotions, href: '/promotions' },
+    { name: t.nav.reviews, href: '/reviews' },
     { name: t.nav.about, href: '/about' },
     { name: t.nav.contact, href: '/contact' },
   ];

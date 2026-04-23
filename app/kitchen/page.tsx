@@ -16,6 +16,7 @@ import {
 } from "lucide-react"
 import { mockMenuItems } from "@/lib/mock-data"
 import { useToast } from "@/hooks/use-toast"
+import { useLocale } from "@/lib/i18n/locale-context"
 
 // Mock orders for kitchen
 const mockKitchenOrders = [
@@ -64,6 +65,7 @@ const mockKitchenOrders = [
 ]
 
 export default function KitchenDashboard() {
+  const { t } = useLocale()
   const { toast } = useToast()
   const [orders, setOrders] = useState(mockKitchenOrders)
 
@@ -72,8 +74,8 @@ export default function KitchenDashboard() {
       order.id === orderId ? { ...order, status: newStatus } : order
     ))
     toast({
-      title: "Order Updated",
-      description: `Order status changed to ${newStatus}`,
+      title: t.kitchen.orderUpdated,
+      description: `${t.kitchen.statusChanged} ${newStatus}`,
     })
   }
 
@@ -83,10 +85,10 @@ export default function KitchenDashboard() {
   }
 
   const stats = [
-    { label: "Pending Orders", value: orders.filter(o => o.status === 'pending').length, icon: AlertCircle, color: "text-orange-500" },
-    { label: "In Progress", value: orders.filter(o => o.status === 'preparing').length, icon: Flame, color: "text-red-500" },
-    { label: "Completed Today", value: 24, icon: CheckCircle2, color: "text-green-500" },
-    { label: "Avg. Prep Time", value: "18 min", icon: Timer, color: "text-blue-500" },
+    { label: t.kitchen.pendingOrders, value: orders.filter(o => o.status === 'pending').length, icon: AlertCircle, color: "text-orange-500" },
+    { label: t.kitchen.inProgress, value: orders.filter(o => o.status === 'preparing').length, icon: Flame, color: "text-red-500" },
+    { label: t.kitchen.completedToday, value: 24, icon: CheckCircle2, color: "text-green-500" },
+    { label: t.kitchen.avgPrepTime, value: "18 min", icon: Timer, color: "text-blue-500" },
   ]
 
   const priorityColors = {
@@ -103,7 +105,7 @@ export default function KitchenDashboard() {
   }
 
   return (
-    <DashboardLayout requiredRoles={["admin", "manager"]} title="Kitchen Display System">
+    <DashboardLayout requiredRoles={["admin", "manager"]} title={t.kitchen.title}>
       <div className="space-y-6">
         {/* Stats */}
         <div className="grid gap-4 md:grid-cols-4">
@@ -133,7 +135,7 @@ export default function KitchenDashboard() {
           <div>
             <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
               <AlertCircle className="h-5 w-5 text-orange-500" />
-              Pending ({orders.filter(o => o.status === 'pending').length})
+              {t.kitchen.pending} ({orders.filter(o => o.status === 'pending').length})
             </h3>
             <div className="space-y-4">
               {orders.filter(o => o.status === 'pending').map((order) => (
@@ -165,15 +167,15 @@ export default function KitchenDashboard() {
                     ))}
                     <div className="flex items-center gap-2 text-xs text-muted-foreground pt-2 border-t">
                       <Clock className="h-3 w-3" />
-                      <span>{getElapsedTime(order.orderTime)} min ago</span>
-                      <span className="ml-auto">Est. {order.estimatedTime} min</span>
+                      <span>{getElapsedTime(order.orderTime)} {t.kitchen.minAgo}</span>
+                      <span className="ml-auto">{t.kitchen.estimated} {order.estimatedTime} min</span>
                     </div>
                     <Button 
                       className="w-full" 
                       size="sm"
                       onClick={() => updateOrderStatus(order.id, 'preparing')}
                     >
-                      Start Preparing
+                      {t.kitchen.startPreparing}
                     </Button>
                   </CardContent>
                 </Card>
@@ -185,7 +187,7 @@ export default function KitchenDashboard() {
           <div>
             <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
               <Flame className="h-5 w-5 text-red-500" />
-              Preparing ({orders.filter(o => o.status === 'preparing').length})
+              {t.kitchen.preparing} ({orders.filter(o => o.status === 'preparing').length})
             </h3>
             <div className="space-y-4">
               {orders.filter(o => o.status === 'preparing').map((order) => (
@@ -200,7 +202,7 @@ export default function KitchenDashboard() {
                         </CardDescription>
                       </div>
                       <Badge className="bg-blue-500">
-                        In Progress
+                        {t.kitchen.inProgress}
                       </Badge>
                     </div>
                   </CardHeader>
@@ -217,7 +219,7 @@ export default function KitchenDashboard() {
                     ))}
                     <div className="flex items-center gap-2 text-xs text-muted-foreground pt-2 border-t">
                       <Clock className="h-3 w-3" />
-                      <span>{getElapsedTime(order.orderTime)} min elapsed</span>
+                      <span>{getElapsedTime(order.orderTime)} min {t.kitchen.elapsed}</span>
                     </div>
                     <Button 
                       className="w-full bg-green-500 hover:bg-green-600" 
@@ -225,7 +227,7 @@ export default function KitchenDashboard() {
                       onClick={() => updateOrderStatus(order.id, 'ready')}
                     >
                       <CheckCircle2 className="h-4 w-4 mr-2" />
-                      Mark as Ready
+                      {t.kitchen.markAsReady}
                     </Button>
                   </CardContent>
                 </Card>
@@ -237,13 +239,13 @@ export default function KitchenDashboard() {
           <div>
             <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
               <CheckCircle2 className="h-5 w-5 text-green-500" />
-              Ready (0)
+              {t.kitchen.ready} (0)
             </h3>
             <div className="space-y-4">
               {orders.filter(o => o.status === 'ready').length === 0 && (
                 <Card className="p-8 text-center border-dashed">
                   <ChefHat className="h-12 w-12 mx-auto mb-2 text-muted-foreground opacity-20" />
-                  <p className="text-sm text-muted-foreground">No orders ready</p>
+                  <p className="text-sm text-muted-foreground">{t.kitchen.noOrdersReady}</p>
                 </Card>
               )}
             </div>
@@ -253,8 +255,8 @@ export default function KitchenDashboard() {
         {/* Menu Quick Reference */}
         <Card>
           <CardHeader>
-            <CardTitle>Menu Quick Reference</CardTitle>
-            <CardDescription>Preparation times and ingredients</CardDescription>
+            <CardTitle>{t.kitchen.menuQuickReference}</CardTitle>
+            <CardDescription>{t.kitchen.prepTimesIngredients}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
