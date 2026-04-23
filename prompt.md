@@ -1,16 +1,24 @@
-Build a **full Hotel Management System web application** for managing **one hotel** with a modern UI, secure backend, and **role-based access control**. The system should manage **rooms, bookings, customers, employees, restaurant/kitchen, housekeeping, payments, gallery, services, reports, and inventory**.
+FULL UPDATED PROMPT (5-STAR HOTEL SYSTEM)
 
-The platform must support- **Restaurant & Dining**: Interactive food gallery at `/restaurant` with detailed ingredients, portion sizes, and diet-friendly badges.
-- **Theme Customization**: Global Light/Dark mode toggle (Sun/Moon) available in both public and dashboard headers.
+Build a full Hotel Management System web application for managing one hotel with a modern UI, secure backend, and role-based access control. The system should manage rooms, bookings, customers, employees, restaurant/kitchen, housekeeping, payments, gallery, services, reports, and inventory.
 
-Integrate Ethiopian payment systems **Telebirr** and **Chapa** for online payments.
+🌟 Core Platform Features
+Restaurant & Dining: Interactive food gallery at /restaurant with detailed ingredients, portion sizes, and diet-friendly badges.
+Theme Customization: Global Light/Dark mode toggle (Sun/Moon) available in both public and dashboard headers.
+3D / 360° Support: Room images and gallery must support interactive 3D / 360° virtual tours with zoom, rotate, fullscreen, and hotspots.
+💳 Payment Integration
 
-IMPORTANT: **Room images and gallery images must support 3D / 360° interactive views** so users can explore rooms and facilities virtually.
+Integrate Ethiopian payment systems:
 
----
+Chapa
 
-### User Roles
+Enhanced features:
 
+Webhook-based payment confirmation
+Payment retry system
+Fraud detection flags
+Payment reconciliation reports
+👥 User Roles
 Admin
 Manager
 Receptionist
@@ -18,110 +26,174 @@ Kitchen Staff
 Housekeeping
 Customer (Guest)
 
-Each role has its own permissions and dashboard.
+Each role has granular permissions and dedicated dashboards.
 
----
-
-### Authentication & Security
-
+🔐 Advanced Authentication & Security
 User registration and login
 Password reset
 Email verification
 Profile management
-Role-based access
-Activity logs
+Role-based access control (RBAC)
+Fine-grained permission matrix
 
----
+Advanced security:
 
-### Multi-Language
-
-Support **English and Amharic** using an internationalization system (i18n).
-
-Features:
+Device/session tracking
+IP-based access restriction
+Full audit trail system:
+Track every action (booking, payment, edits, etc.)
+Store: user, action, timestamp, IP
+Data encryption (sensitive fields)
+GDPR-style privacy controls
+🌍 Multi-Language (i18n)
+Support English and Amharic
 Language switcher
-Translated UI
-Store user language preference
+Store user preference
+Dynamic translation system
+🏨 Room Management
 
----
+Admin can:
 
-### Room Management
+Add / edit / delete rooms
 
-Admin can add, edit, delete rooms.
+Room data:
 
-Room information:
 Room number
 Room type (Single, Double, Deluxe, Suite, VIP)
 Price per night
-Floor number
+Floor
 Max occupancy
 Facilities (WiFi, TV, AC, minibar, balcony)
-Room status (Available, Booked, Occupied, Cleaning, Maintenance)
+Status (Available, Booked, Occupied, Cleaning, Maintenance)
 
 Features:
-Upload multiple images
-Upload **3D / 360° room view images**
 
-Customers can explore **interactive 3D room previews** before booking.
+Multiple images upload
+3D / 360° room views
+Interactive preview before booking
+📅 Booking / Reservation System
 
----
+Customers:
 
-### Booking / Reservation System
+Search rooms
+View 3D previews
+Book / cancel
+View history
 
-Customers can:
-Search rooms by date
-View room details and 3D preview
-Book rooms
-Cancel bookings
-View booking history
+Reception/Admin:
 
-Reception/Admin can:
-Create bookings
-Edit reservations
-Cancel reservations
-Check-in / Check-out guests
-View booking calendar
-Handle walk-in guests
+Create/edit bookings
+Check-in / Check-out
+Booking calendar
+Walk-in handling
 
-Booking details:
-Check-in date
-Check-out date
-Guest count
+Advanced:
+
+Quick check-in mode
+Group bookings
+Corporate bookings
+Booking history tracking
 Special requests
+🧾 Billing & Finance (Advanced)
+Multi-currency (ETB)
+Tax configuration (VAT, service charge)
+Folio system (guest ledger)
+Charge posting (room, restaurant, services)
+Invoice splitting
+Night audit system (daily closing)
+💰 Payments (Enhanced – IMPORTANT ADD)
+Partial payments
+Split payments
+Deposit handling
+Refund system
+Payment Methods:
+Online (Chapa)
+Cash payment
+Credit payment (pay later / postpaid)
+Cash Handling:
+Cashier must:
+Record total cash received per transaction
+Track daily total cash collection
+Include in shift and financial reports
+Organization / Corporate Payments:
+Support company-paid bookings
+Group guests under one organization
+Allow:
+Individual stay tracking
+Final single consolidated payment by organization after all guests check out
+Generate organization invoice summary
+🧾 Invoice & Receipt Generation (NEW ADD – CRITICAL)
+Auto-generate receipts and invoices after payment
+Downloadable PDF receipt
+Include:
+Guest details
+Organization (if applicable)
+Services used
+Taxes and totals
+Payment method
+Support:
+Individual receipts
+Group / organization invoices
+Split invoices
+🛎️ Concierge & Guest Services
+Service requests:
+Taxi
+Tours
+External services
+Task lifecycle:
+Requested → Assigned → Completed
+Guest communication logs
+🧹 Housekeeping (Advanced)
+Cleaning schedules
+Task assignment
+Room status updates
 
----
+Advanced:
 
-### Customer Management
+Inspection checklist
+Supervisor approval
+Linen/laundry tracking
+Lost & found
+Maintenance escalation system
+🍽️ Restaurant / Kitchen Management
 
-Store guest data:
+Menu:
 
-Name
-Phone
-Email
-Address
-Nationality
-ID or passport number
-Booking history
-Payment history
+Add/edit/delete items
+Categories (Breakfast, Lunch, Dinner, Drinks, Desserts)
 
-Admin can view, search, and edit customers.
+Customer:
 
----
+Browse menu
+Order food
+Room service
 
-### Employee Management
+Kitchen:
 
-Admin manages hotel staff.
+Order dashboard
+Status updates
 
-Employee data:
-Name
-Role
-Phone
-Email
-Salary
-Hire date
-Department
-Schedule
+Advanced:
+
+Table management (POS)
+Order splitting / bill merging
+Kitchen Display System (KDS)
+Order priority + timers
+Recipe management
+Auto inventory deduction
+📦 Inventory (Enterprise Level)
+Multi-store inventory (kitchen, housekeeping, bar)
+Supplier/vendor management
+Purchase orders
+Goods receiving
+Stock transfer
+Expiry tracking
+Inventory valuation reports
+👨‍💼 Employee Management
+Staff records
 
 Departments:
+
 Reception
 Housekeeping
 Kitchen
@@ -130,94 +202,26 @@ Management
 Security
 
 Features:
+
 Shift scheduling
-Task assignment
 Attendance tracking
+Task assignment
 
----
+Advanced:
 
-### Housekeeping
-
-Manage cleaning operations.
-
-Features:
-Cleaning schedules
-Assign tasks
-Update room cleaning status
-Report maintenance issues
-
-Status:
-Pending
-In progress
-Completed
-
----
-
-### Restaurant / Kitchen Management
-
-Hotel restaurant system.
-
-Menu management:
-Add/edit/delete items
-Food images
-Prices
+Performance tracking
+Internal messaging
+Biometric integration (optional)
+🏢 Event & Conference Management
+Event scheduling
+Hall booking
+Package pricing (hall + services)
+Resource allocation
+Event billing
+🖼️ Gallery (3D Enabled)
 
 Categories:
-Breakfast
-Lunch
-Dinner
-Drinks
-Desserts
 
-Customers can:
-Browse menu
-Order food
-Request room service
-
-Kitchen dashboard:
-View orders
-Update status (Pending, Preparing, Ready, Delivered)
-
----
-
-### Payment System
-
-Integrate **Telebirr** and **Chapa**.
-
-Features:
-Pay for room bookings
-Pay for food orders
-Payment confirmation
-Payment history
-Refund support
-
-Payment methods:
-Online payment
-Cash
-Mobile payment
-
----
-
-### Billing & Invoices
-
-Auto-generate invoices for:
-
-Room bookings
-Food orders
-Extra services
-
-Features:
-PDF invoices
-Tax calculation
-Discount support
-
----
-
-### Gallery (3D Support)
-
-Public gallery showing hotel facilities.
-
-Categories:
 Rooms
 Restaurant
 Lobby
@@ -225,125 +229,113 @@ Events
 Facilities
 
 Features:
+
 Upload images
-Upload **3D / 360° virtual tour images**
-Interactive viewer with rotate, zoom, fullscreen
+Upload 360° virtual tours
+Interactive viewer
 
----
+Advanced:
 
-### Services & Facilities
-
-Manage additional services:
-
+Three.js integration
+VR-ready mode
+Hotspots:
+Click objects (bed, balcony, etc.)
+Show descriptions
+🧰 Services & Facilities
 Spa
 Gym
 Laundry
 Transport
 Conference halls
-Event halls
 
 Guests can request services.
 
----
+📊 Reports & Analytics
 
-### Event Hall Booking
-
-Manage event spaces.
-
-Features:
-Add halls
-Set capacity
-Set price
-Book halls for events
-
----
-
-### Reports & Analytics
-
-Admin dashboard statistics:
+Admin dashboard:
 
 Daily bookings
-Monthly revenue
-Room occupancy rate
+Revenue
+Occupancy rate
 Restaurant sales
 Employee activity
-Customer statistics
 
-Export reports to **PDF or Excel**.
+Advanced:
 
----
+ADR (Average Daily Rate)
+RevPAR
+Forecasting
+Department-level analytics
 
-### Notifications
+Export:
 
+Excel / CSV
+🔔 Notifications
 Booking confirmations
-Payment confirmations
-Room service alerts
-Admin notifications
+Payment alerts
+Room service updates
 
 Channels:
+
 Email
-SMS
 System notifications
 
----
+Advanced:
 
-### Reviews & Ratings
-
-Guests can rate their stay and leave reviews.
-Admin can moderate reviews.
-
----
-
-### Promotions
-
-Create discounts, coupon codes, and seasonal offers.
-
----
-
-### Inventory
-
-Track hotel supplies (kitchen items, cleaning materials).
-
-Features:
-Add inventory
-Track stock
-Low-stock alerts
-
----
-
-### Backup & Settings
-
+Role-based alerts
+⭐ Reviews & Ratings
+Guest reviews
+Admin moderation
+🎯 Promotions
+Discounts
+Coupons
+Seasonal offers
+🔄 Backup & System Settings
 Database backup
-Restore data
-System configuration
-Language settings
-Currency settings
+Restore system
 
----
+Configurations:
 
-### Admin Dashboard
-
-Show statistics:
-
+Language
+Currency
+📈 Admin Dashboard
 Total rooms
 Available rooms
 Active guests
 Employees
-Today's bookings
+Bookings
 Revenue
-Restaurant orders
+Orders
+⚙️ System Reliability
+Offline-safe operations
+Auto backup system
+Error logging & monitoring
+🔗 Integrations (Advanced)
+OTA support (booking platforms)
+Channel manager
+Accounting integration
+🧪 Testing & Monitoring
+System health dashboard
+Performance monitoring
+Centralized error logs
+🧱 Tech Requirements
 
----
+Frontend:
 
-### Tech Requirements
+Next.js + Three.js
 
-Frontend: React or Next.js
-Backend: Node.js / Django / Laravel
-Database: PostgreSQL or MySQL
+Backend:
+
+Django + Django REST Framework
+
+Database:
+
+PostgreSQL
 
 Architecture:
+
 REST API
 Secure authentication
-Responsive design
-Modular scalable system
-3D viewer integration for 360° images
+Modular & scalable
+Responsive UI
+3D viewer integration (Three.js)

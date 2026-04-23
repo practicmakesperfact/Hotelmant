@@ -22,6 +22,10 @@ export function PublicHeader() {
     { name: t.nav.home, href: '/' },
     { name: t.nav.rooms, href: '/rooms' },
     { name: t.restaurant?.title || 'Restaurant', href: '/restaurant' },
+    { name: 'Events', href: '/events' },
+    { name: 'Gallery', href: '/gallery' },
+    { name: 'Promotions', href: '/promotions' },
+    { name: 'Reviews', href: '/reviews' },
     { name: t.nav.about, href: '/about' },
     { name: t.nav.contact, href: '/contact' },
   ];

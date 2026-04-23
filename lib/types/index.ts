@@ -98,7 +98,64 @@ export interface RoomPricing {
 // Bookings
 export type BookingStatus = 'pending' | 'confirmed' | 'checked_in' | 'checked_out' | 'cancelled' | 'no_show';
 export type PaymentStatus = 'pending' | 'partial' | 'paid' | 'refunded' | 'failed';
-export type PaymentMethod = 'chapa' | 'telebirr' | 'cash' | 'bank_transfer' | 'card';
+export type PaymentMethod = 'chapa' | 'telebirr' | 'cash' | 'bank_transfer' | 'card' | 'credit';
+
+// Payment & Invoice Types
+export interface Payment {
+  id: string;
+  bookingId: string;
+  amount: number;
+  method: PaymentMethod;
+  status: PaymentStatus;
+  transactionId?: string;
+  paidAt: Date;
+  paidBy: string; // customer or staff ID
+  notes?: string;
+  receiptUrl?: string;
+}
+
+export interface Invoice {
+  id: string;
+  invoiceNumber: string;
+  bookingId?: string;
+  organizationId?: string;
+  customerId: string;
+  customerName: string;
+  items: InvoiceItem[];
+  subtotal: number;
+  tax: number;
+  serviceCharge: number;
+  discount: number;
+  total: number;
+  paidAmount: number;
+  status: 'draft' | 'issued' | 'paid' | 'partial' | 'overdue' | 'cancelled';
+  issuedAt: Date;
+  dueDate?: Date;
+  paidAt?: Date;
+  notes?: string;
+}
+
+export interface InvoiceItem {
+  id: string;
+  description: string;
+  quantity: number;
+  unitPrice: number;
+  total: number;
+}
+
+export interface Organization {
+  id: string;
+  name: string;
+  contactPerson: string;
+  email: string;
+  phone: string;
+  address: string;
+  taxId?: string;
+  creditLimit: number;
+  paymentTerms: string; // e.g., "Net 30"
+  isActive: boolean;
+  createdAt: Date;
+}
 
 export interface Booking {
   id: string;
@@ -123,6 +180,10 @@ export interface Booking {
   paymentMethod?: PaymentMethod;
   specialRequests?: string;
   addOns: BookingAddOn[];
+  organizationId?: string; // For corporate bookings
+  organizationName?: string;
+  payments: Payment[]; // Track multiple payments
+  invoiceId?: string;
   createdAt: Date;
   updatedAt: Date;
   createdBy?: string; // staff ID if walk-in
@@ -395,4 +456,126 @@ export interface LocaleConfig {
   name: string;
   nativeName: string;
   direction: 'ltr' | 'rtl';
+}
+
+// Audit Trail & Security
+export interface AuditLog {
+  id: string;
+  userId: string;
+  userName: string;
+  action: string;
+  entity: string; // e.g., 'booking', 'payment', 'room'
+  entityId: string;
+  changes?: Record<string, any>;
+  ipAddress: string;
+  userAgent: string;
+  timestamp: Date;
+}
+
+export interface UserSession {
+  id: string;
+  userId: string;
+  deviceName: string;
+  ipAddress: string;
+  location?: string;
+  loginAt: Date;
+  lastActivityAt: Date;
+  isActive: boolean;
+}
+
+// Gallery & Media
+export interface GalleryItem {
+  id: string;
+  title: string;
+  description?: string;
+  category: 'rooms' | 'restaurant' | 'lobby' | 'events' | 'facilities' | 'exterior';
+  imageUrl: string;
+  panoramaUrl?: string; // 360° view
+  is360: boolean;
+  hotspots?: Hotspot[];
+  uploadedAt: Date;
+  uploadedBy: string;
+}
+
+export interface Hotspot {
+  id: string;
+  x: number; // percentage
+  y: number; // percentage
+  title: string;
+  description: string;
+  icon?: string;
+}
+
+// Events & Conference
+export interface Event {
+  id: string;
+  name: string;
+  eventType: 'conference' | 'wedding' | 'meeting' | 'party' | 'other';
+  hallId: string;
+  hallName: string;
+  organizerId: string;
+  organizerName: string;
+  organizerEmail: string;
+  organizerPhone: string;
+  startDate: Date;
+  endDate: Date;
+  numberOfGuests: number;
+  packageId?: string;
+  services: string[]; // service IDs
+  totalAmount: number;
+  paidAmount: number;
+  status: 'inquiry' | 'confirmed' | 'in_progress' | 'completed' | 'cancelled';
+  notes?: string;
+  createdAt: Date;
+}
+
+export interface ConferenceHall {
+  id: string;
+  name: string;
+  capacity: number;
+  size: number; // sqm
+  amenities: string[];
+  pricePerHour: number;
+  pricePerDay: number;
+  images: string[];
+  isAvailable: boolean;
+}
+
+// Reviews & Ratings
+export interface Review {
+  id: string;
+  bookingId: string;
+  customerId: string;
+  customerName: string;
+  rating: number; // 1-5
+  cleanliness: number;
+  service: number;
+  amenities: number;
+  value: number;
+  location: number;
+  comment: string;
+  response?: string; // Admin response
+  respondedBy?: string;
+  respondedAt?: Date;
+  status: 'pending' | 'approved' | 'rejected';
+  createdAt: Date;
+}
+
+// Promotions & Discounts
+export interface Promotion {
+  id: string;
+  code: string;
+  name: string;
+  description: string;
+  discountType: 'percentage' | 'fixed';
+  discountValue: number;
+  minBookingAmount?: number;
+  maxDiscount?: number;
+  validFrom: Date;
+  validTo: Date;
+  usageLimit?: number;
+  usedCount: number;
+  applicableRoomTypes?: RoomType[];
+  isActive: boolean;
+  createdAt: Date;
 }
