@@ -14,9 +14,11 @@ import {
   TrendingUp
 } from "lucide-react"
 import { mockReviews } from "@/lib/mock-data"
+import { useLocale } from "@/lib/i18n/locale-context"
 import { format } from "date-fns"
 
 export default function ReviewsPage() {
+  const { t } = useLocale()
   const [filter, setFilter] = useState<number | 'all'>('all')
 
   const filteredReviews = filter === 'all' 
@@ -49,9 +51,9 @@ export default function ReviewsPage() {
         <div className="container mx-auto px-4">
           {/* Header */}
           <div className="text-center max-w-3xl mx-auto mb-12">
-            <h1 className="text-4xl font-serif font-bold mb-4">Guest Reviews</h1>
+            <h1 className="text-4xl font-serif font-bold mb-4">{t.reviews?.title || 'Guest Reviews'}</h1>
             <p className="text-muted-foreground text-lg">
-              See what our guests are saying about their experience
+              {t.reviews?.subtitle || 'See what our guests are saying about their experience'}
             </p>
           </div>
 

@@ -76,18 +76,6 @@ export function PublicHeader() {
 
         {/* Right side actions */}
         <div className="hidden lg:flex lg:flex-1 lg:justify-end lg:gap-x-4 lg:items-center">
-          {/* Theme Toggle */}
-          <Button 
-            variant="ghost" 
-            size="icon"
-            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-            className="mr-2"
-          >
-            <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-            <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-            <span className="sr-only">Toggle theme</span>
-          </Button>
-
           <LanguageSwitcher />
           
           {isAuthenticated ? (
@@ -111,6 +99,17 @@ export function PublicHeader() {
               </Link>
             </>
           )}
+
+          {/* Theme Toggle - Moved after register */}
+          <Button 
+            variant="ghost" 
+            size="icon"
+            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+          >
+            <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+            <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+            <span className="sr-only">Toggle theme</span>
+          </Button>
         </div>
       </nav>
 
@@ -132,18 +131,7 @@ export function PublicHeader() {
               </Link>
             ))}
             <div className="pt-4 border-t border-border flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <LanguageSwitcher />
-                <Button 
-                  variant="ghost" 
-                  size="icon"
-                  onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                >
-                  <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-                  <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-                  <span className="sr-only">Toggle theme</span>
-                </Button>
-              </div>
+              <LanguageSwitcher />
               {isAuthenticated ? (
                 <Link href={getDashboard()}>
                   <Button variant="outline" size="sm" className="gap-2">
@@ -165,6 +153,15 @@ export function PublicHeader() {
                   </Link>
                 </div>
               )}
+              <Button 
+                variant="ghost" 
+                size="icon"
+                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+              >
+                <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+                <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+                <span className="sr-only">Toggle theme</span>
+              </Button>
             </div>
           </div>
         </div>

@@ -20,7 +20,7 @@ import {
 } from "lucide-react"
 import { mockGalleryItems } from "@/lib/mock-data"
 import { useLocale } from "@/lib/i18n/locale-context"
-import Image from "next/image"
+import { Viewer360 } from "@/components/viewer-360"
 
 export default function GalleryPage() {
   const { t } = useLocale()
@@ -29,13 +29,13 @@ export default function GalleryPage() {
   const [showViewer, setShowViewer] = useState(false)
 
   const categories = [
-    { label: 'All', value: 'all' },
-    { label: 'Rooms', value: 'rooms' },
-    { label: 'Restaurant', value: 'restaurant' },
-    { label: 'Lobby', value: 'lobby' },
-    { label: 'Events', value: 'events' },
-    { label: 'Facilities', value: 'facilities' },
-    { label: 'Exterior', value: 'exterior' },
+    { label: t.gallery?.allCategories || 'All', value: 'all' },
+    { label: t.gallery?.rooms || 'Rooms', value: 'rooms' },
+    { label: t.gallery?.restaurant || 'Restaurant', value: 'restaurant' },
+    { label: t.gallery?.lobby || 'Lobby', value: 'lobby' },
+    { label: t.gallery?.events || 'Events', value: 'events' },
+    { label: t.gallery?.facilities || 'Facilities', value: 'facilities' },
+    { label: t.gallery?.exterior || 'Exterior', value: 'exterior' },
   ]
 
   const filteredItems = selectedCategory === 'all' 
@@ -53,9 +53,9 @@ export default function GalleryPage() {
         <div className="container mx-auto px-4">
           {/* Header */}
           <div className="text-center max-w-3xl mx-auto mb-12">
-            <h1 className="text-4xl font-serif font-bold mb-4">Hotel Gallery</h1>
+            <h1 className="text-4xl font-serif font-bold mb-4">{t.gallery?.title || 'Hotel Gallery'}</h1>
             <p className="text-muted-foreground text-lg">
-              Explore our beautiful spaces with interactive 360° virtual tours
+              {t.gallery?.subtitle || 'Explore our beautiful spaces with interactive 360° virtual tours'}
             </p>
           </div>
 
@@ -96,7 +96,7 @@ export default function GalleryPage() {
                       onClick={() => handleViewItem(item)}
                     >
                       <Maximize2 className="h-4 w-4 mr-2" />
-                      {item.is360 ? 'View 360°' : 'View Image'}
+                      {item.is360 ? (t.gallery?.view360 || 'View 360°') : (t.gallery?.viewImage || 'View Image')}
                     </Button>
                   </div>
                 </div>
@@ -120,8 +120,8 @@ export default function GalleryPage() {
           {filteredItems.length === 0 && (
             <div className="text-center py-24 bg-background rounded-3xl border-2 border-dashed">
               <ImageIcon className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-20" />
-              <h3 className="text-xl font-medium mb-1">No images found</h3>
-              <p className="text-muted-foreground">Try selecting a different category.</p>
+              <h3 className="text-xl font-medium mb-1">{t.gallery?.noImages || 'No images found'}</h3>
+              <p className="text-muted-foreground">{t.gallery?.tryDifferentCategory || 'Try selecting a different category.'}</p>
             </div>
           )}
         </div>
@@ -145,21 +145,11 @@ export default function GalleryPage() {
           </DialogHeader>
           <div className="flex-1 relative bg-black">
             {selectedItem?.is360 ? (
-              <div className="w-full h-full flex items-center justify-center">
-                <div className="text-center text-white p-8">
-                  <Layers className="h-16 w-16 mx-auto mb-4 opacity-50" />
-                  <h3 className="text-xl font-semibold mb-2">360° Virtual Tour</h3>
-                  <p className="text-sm text-white/70 mb-4">
-                    Interactive 360° viewer will be integrated here using Three.js
-                  </p>
-                  <div className="space-y-2 text-sm text-white/60">
-                    <p>• Drag to rotate view</p>
-                    <p>• Scroll to zoom in/out</p>
-                    <p>• Click hotspots for information</p>
-                    <p>• Press F for fullscreen</p>
-                  </div>
-                </div>
-              </div>
+              <Viewer360 
+                imageUrl={selectedItem.imageUrl}
+                hotspots={selectedItem.hotspots}
+                title={selectedItem.title}
+              />
             ) : (
               <img 
                 src={selectedItem?.imageUrl} 
